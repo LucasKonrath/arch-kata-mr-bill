@@ -65,7 +65,7 @@ Major Decisions:
 Tradeoffs:
 ```
 1. React Native vs (Flutter and Native)
-2. Serverless vs Microservices
+2. Services vs Serverless
 3. Redis vs Enbeded Caches
 ```
 Each tradeoff line need to be:
@@ -75,8 +75,57 @@ PROS (+)
 CONS (+)
   * Problem: Explanation that justify why the problem is true.
 ```
-PS: Be careful to not confuse problem with explanation. 
-<BR/>Recommended reading: http://diego-pacheco.blogspot.com/2023/07/tradeoffs.html
+
+Major Decisions:
+
+1. No monoliths
+2. Single native language for mobile
+3. Multiple DBs - not one relational DB for everything
+4. Restricted to AWS
+
+Tradeoffs:
+## 1. SOA (Service Oriented Architecture) vs Monoliths
+
+PROS: 
+  -  Better isolation
+  - Horizontal Scalability
+  - No Single Point of Failure
+
+CONS:
+  - Higher time to market (more development time)
+  - Might be unnecessary spending if the platform is not used enough
+
+
+## 2. Services vs Serverless
+
+PROS:
+  - Predictable performance
+  - No need to worry about cold starts
+
+CONS:
+  - More infrastructure management
+  - Might be more expensive than serverless depending on the workflows
+
+## 3. Multiple DBs vs One Relational DB
+
+PROS:
+- Specialized DBs will incur better performance
+- No distributed monolith
+- Loosen coupling
+
+CONS:
+- Higher cost to maintain
+- Higher integration between data sources and services needed
+
+## 4. Restrict to AWS vs Private Cloud
+
+PROS:
+- Need to worry less about maintenance
+- Usage of managed services will ease development and operations
+
+CONS:
+- If many managed solutions are used you might end up with vendor lock-in
+- If using pay-as-you-go cost might be a big issue
 
 ### 🌏 6. For each key major component
 
