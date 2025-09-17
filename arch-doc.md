@@ -143,11 +143,102 @@ Recommended Reading: http://diego-pacheco.blogspot.com/2018/05/internal-system-d
 
 ### 🖹 7. Migrations
 
-IF Migrations are required describe the migrations strategy with proper diagrams, text and tradeoffs.
+No migrations necessary.
 
 ### 🖹 8. Testing strategy
 
-Explain the techniques, principles, types of tests and will be performaned, and spesific details how to mock data, stress test it, spesific chaos goals and assumptions.
+Our multi-layered testing strategy ensures quality, reliability, and security across the Mr. Bill platform:
+
+#### Unit Tests
+- **Coverage**: Aim for >85% code coverage in all services
+- **Framework**: Jest for JavaScript/TypeScript, JUnit for Java
+- **Mocking**: Use mock libraries to isolate units (Mockito for Java, Jest mocks for JS/TS)
+- **Run frequency**: On every commit via CI pipeline
+
+#### Integration Tests
+- **Scope**: Verify interactions between services, databases, and third-party APIs
+- **Approach**: Use test containers for database integration
+- **Tools**: Postman collections for API testing, Testcontainers for DB testing
+- **Run frequency**: Daily in CI pipeline
+
+#### Contract Tests
+- **Purpose**: Ensure service interfaces don't break consumer expectations
+- **Tools**: Pact for consumer-driven contract testing
+- **Implementation**: Define consumer expectations as contracts
+- **Run frequency**: On API changes and during integration tests
+
+#### End-to-End Tests
+- **Scope**: Test complete user flows across the entire system
+- **Tools**: Cypress for web, Detox for mobile
+- **Scenarios**: Cover critical user journeys (POC creation, search, reporting)
+- **Run frequency**: Nightly and before releases
+
+#### UI Tests
+- **Scope**: Verify UI components and interactions
+- **Tools**: React Testing Library for components, Storybook for visual testing
+- **Visual regression**: Percy for visual comparisons
+- **Accessibility**: Include a11y tests using axe-core
+
+#### Smoke Tests
+- **Purpose**: Verify core functionality after deployment
+- **Scope**: Login, POC creation, search, basic reporting
+- **Run frequency**: After every deployment to any environment
+- **Implementation**: Automated via CI/CD pipeline
+
+#### Stress Tests
+- **Purpose**: Verify system behavior under heavy load
+- **Tools**: JMeter, Gatling, Locust
+- **Scenarios**: High-volume POC creation, concurrent searches, report generation
+- **Metrics**: Response time, error rate, resource utilization
+- **Run frequency**: Monthly and before major releases
+
+#### Chaos Tests
+- **Purpose**: Ensure system resilience during failures
+- **Tools**: Chaos Monkey, AWS Fault Injection Simulator
+- **Scenarios**: Database failures, service outages, network latency
+- **Implementation**: Controlled experiments in staging environment
+- **Run frequency**: Quarterly
+
+#### Mutation Tests
+- **Purpose**: Verify test quality by modifying code
+- **Tools**: Stryker for JavaScript, PIT for Java
+- **Coverage**: Focus on critical services and business logic
+- **Run frequency**: Weekly in development environment
+
+#### Fuzzing Tests
+- **Purpose**: Find security vulnerabilities and edge cases
+- **Tools**: AFL for API fuzzing, OWASP ZAP for security
+- **Targets**: API endpoints, input validation, authentication
+- **Run frequency**: Monthly and for security-sensitive changes
+
+#### Exploratory Tests
+- **Approach**: Structured exploratory testing sessions
+- **Documentation**: Use session-based testing with recorded findings
+- **Focus areas**: New features, complex workflows, reported issues
+- **Run frequency**: Before major releases and for complex features
+
+#### A/B Tests
+- **Purpose**: Compare feature variants with real users
+- **Implementation**: Feature flags via LaunchDarkly
+- **Metrics**: User engagement, time spent, feature adoption
+- **Analysis**: Statistical significance testing for decision making
+- **Monitoring**: Real-time dashboards for experiment monitoring
+
+#### Testing Environments
+1. **Development**: Unit, integration tests
+2. **QA**: All automated tests except stress and chaos
+3. **Staging**: Full suite including stress and chaos tests
+4. **Production**: Smoke tests, A/B tests, production monitoring
+
+#### Test Data Management
+- Anonymized production data for realistic testing
+- Seed data scripts for consistent test environments
+- Data cleanup processes after test execution
+
+#### Mocking Strategy
+- External APIs mocked during unit and integration testing
+- Service virtualization for third-party dependencies
+- Consistent mocking patterns across test suites
 
 ### 🖹 9. Observability strategy
 
