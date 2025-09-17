@@ -242,7 +242,161 @@ Our multi-layered testing strategy ensures quality, reliability, and security ac
 
 ### 🖹 9. Observability strategy
 
-Explain the techniques, principles,types of observability that will be used, key metrics, what would be logged and how to design proper dashboards and alerts.
+#### Distributed Tracing
+
+- **Technology**: AWS X-Ray integrated with OpenTelemetry
+- **Implementation**:
+  - Unique trace ID propagated across all microservices
+  - Automatic instrumentation for Java services via X-Ray SDK
+  - Manual instrumentation for critical business operations
+  - Sampling strategy: 100% for errors, 5% for successful requests
+- **Key Metrics**:
+  - End-to-end transaction latency
+  - Service-to-service communication time
+  - Dependency bottlenecks identification
+  - Error tracing across service boundaries
+- **Correlation**: Trace IDs embedded in logs and metrics for cross-referencing
+
+#### Log Management
+
+- **Collection**: AWS CloudWatch Logs with Fluent Bit agents
+- **Processing**: CloudWatch Logs Insights for real-time analysis
+- **Long-term Storage**: S3 with lifecycle policies (30 days hot, 1 year cold)
+- **Standardization**:
+  - JSON structured logging format
+  - Common fields: timestamp, service, traceId, spanId, severity
+  - Context-specific fields for business events
+- **Log Levels**:
+  - ERROR: All exceptions and failures
+  - WARN: Degraded service, retries, slow operations
+  - INFO: Key business events, service startup/shutdown
+  - DEBUG: Development-only, disabled in production
+- **Sensitive Data**: PII automatically redacted before ingestion
+
+#### APM (Application Performance Monitoring)
+
+- **Technology**: AWS CloudWatch ServiceLens with X-Ray integration
+- **Instrumentation**: 
+  - Automatic JVM metrics for Java services
+  - Custom instrumentation for business-critical paths
+  - Database query performance tracking
+- **Key Metrics**:
+  - Application response time distributions
+  - Error rates and exception counts
+  - Memory usage patterns
+  - Garbage collection metrics
+  - Thread pool utilization
+  - Database connection pool metrics
+- **Business Metrics**:
+  - POC creation rate
+  - Search latency
+  - Video generation time
+  - Tenant-specific usage patterns
+
+#### Infrastructure Metrics
+
+- **Collection**: AWS Managed Prometheus
+- **Visualization**: AWS Managed Grafana
+- **Key Metrics**:
+  - CPU, memory, disk utilization
+  - Network throughput and errors
+  - Container health and restart counts
+  - Database connection counts and query performance
+  - Cache hit/miss ratios
+  - Message queue depths and processing rates
+- **Custom Metrics**:
+  - Business-specific throughput indicators
+  - Multi-tenancy resource utilization
+  - Search engine performance metrics
+  - Video processing queue metrics
+
+#### Mobile Performance Monitoring
+
+- **Technology**: AWS Pinpoint Analytics + Firebase Performance Monitoring
+- **Key Metrics**:
+  - App startup time
+  - Screen render time
+  - API call latency from device
+  - UI responsiveness (frame rate)
+  - App stability (crash rate)
+  - Network errors from mobile perspective
+  - Battery consumption
+  - Memory usage on device
+- **User Experience Metrics**:
+  - Time to interactive
+  - Tap response time
+  - Search completion time
+  - Video playback metrics
+- **Segmentation**:
+  - By device type
+  - OS version
+  - Network type (WiFi/4G/5G)
+  - Geographic location
+
+#### Alerting Strategy
+
+- **Primary Tool**: AWS CloudWatch Alarms with PagerDuty integration
+- **Severity Levels**:
+  - P1: Service outage, immediate response (24/7)
+  - P2: Service degradation, response within 1 hour
+  - P3: Non-critical issues, next business day
+- **Alert Types**:
+  - Static threshold alerts
+  - Anomaly detection alerts
+  - Composite alerts (multiple conditions)
+  - Forecast-based alerts (predictive)
+- **Key Alerts**:
+  - Error rate > 1% (P1)
+  - API latency > 500ms (P2)
+  - Database CPU > 80% (P2)
+  - Disk usage > 85% (P3)
+  - Failed tenant authentications spike (P1)
+  - Video generation failure > 5% (P2)
+- **Alert Reduction**:
+  - Correlation rules to prevent alert storms
+  - Auto-remediation for known issues
+  - Alert suppression during maintenance windows
+
+#### Dashboard Strategy
+
+- **Organization**:
+  - Executive dashboard (high-level SLAs, business metrics)
+  - Service-specific dashboards (per-service health)
+  - Infrastructure dashboards
+  - Mobile app performance dashboards
+  - Tenant-specific dashboards
+- **Key Visualizations**:
+  - Service health heatmap
+  - Request volume and latency histograms
+  - Error rate time-series
+  - Resource utilization gauges
+  - User experience metrics
+  - Business KPI correlations with system performance
+
+#### SLOs and SLIs
+
+- **Service Level Objectives**:
+  - API availability: 99.9%
+  - API latency (95th percentile): < 300ms
+  - Search results: < 1s
+  - Video generation: < 10 minutes
+  - Mobile app crash rate: < 0.1%
+- **SLI Measurement**:
+  - Synthetic monitoring probes
+  - Real user monitoring data
+  - Error budget tracking
+  - Burn rate alerts for SLO violations
+
+#### Correlation and Root Cause Analysis
+
+- **Implementation**:
+  - Common correlation IDs across all observability data
+  - Service dependency mapping
+  - Automated RCA suggestions
+  - Change event correlation with incidents
+- **Tools**:
+  - AWS X-Ray service maps
+  - Custom Grafana dashboards with unified metrics/logs/traces
 
 ### 🖹 10. Data Store Designs
 
