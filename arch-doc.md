@@ -624,8 +624,266 @@ Recommended Reading: http://diego-pacheco.blogspot.com/2018/05/internal-system-d
   - `422 Unprocessable Entity`: Code execution failed due to server constraints
   - `500 Internal Server Error`: Server error
 
+### 🖹 7. Migrations
 
-#### 6.3 Persistence Model - Table Structure and Main Queries
+No migrations necessary.
+
+### 🖹 8. Testing strategy
+
+Our multi-layered testing strategy ensures quality, reliability, and security across the Mr. Bill platform:
+
+#### Unit Tests
+- **Coverage**: Aim for >85% code coverage in all services
+- **Framework**: Jest for JavaScript/TypeScript, JUnit for Java
+- **Mocking**: Use mock libraries to isolate units (Mockito for Java, Jest mocks for JS/TS)
+- **Run frequency**: On every commit via CI pipeline
+
+#### Integration Tests
+- **Scope**: Verify interactions between services, databases, and third-party APIs
+- **Approach**: Use test containers for database integration
+- **Tools**: Postman collections for API testing, Testcontainers for DB testing
+- **Run frequency**: Daily in CI pipeline
+
+#### Contract Tests
+- **Purpose**: Ensure service interfaces don't break consumer expectations
+- **Tools**: Pact for consumer-driven contract testing
+- **Implementation**: Define consumer expectations as contracts
+- **Run frequency**: On API changes and during integration tests
+
+#### End-to-End Tests
+- **Scope**: Test complete user flows across the entire system
+- **Tools**: Cypress for web, Detox for mobile
+- **Scenarios**: Cover critical user journeys (POC creation, search, reporting)
+- **Run frequency**: Nightly and before releases
+
+#### UI Tests
+- **Scope**: Verify UI components and interactions
+- **Tools**: React Testing Library for components, Storybook for visual testing
+- **Visual regression**: Percy for visual comparisons
+- **Accessibility**: Include a11y tests using axe-core
+
+#### Smoke Tests
+- **Purpose**: Verify core functionality after deployment
+- **Scope**: Login, POC creation, search, basic reporting
+- **Run frequency**: After every deployment to any environment
+- **Implementation**: Automated via CI/CD pipeline
+
+#### Stress Tests
+- **Purpose**: Verify system behavior under heavy load
+- **Tools**: JMeter, Gatling, Locust
+- **Scenarios**: High-volume POC creation, concurrent searches, report generation
+- **Metrics**: Response time, error rate, resource utilization
+- **Run frequency**: Monthly and before major releases
+
+#### Chaos Tests
+- **Purpose**: Ensure system resilience during failures
+- **Tools**: Chaos Monkey, AWS Fault Injection Simulator
+- **Scenarios**: Database failures, service outages, network latency
+- **Implementation**: Controlled experiments in staging environment
+- **Run frequency**: Quarterly
+
+#### Mutation Tests
+- **Purpose**: Verify test quality by modifying code
+- **Tools**: Stryker for JavaScript, PIT for Java
+- **Coverage**: Focus on critical services and business logic
+- **Run frequency**: Weekly in development environment
+
+#### Fuzzing Tests
+- **Purpose**: Find security vulnerabilities and edge cases
+- **Tools**: AFL for API fuzzing, OWASP ZAP for security
+- **Targets**: API endpoints, input validation, authentication
+- **Run frequency**: Monthly and for security-sensitive changes
+
+#### Exploratory Tests
+- **Approach**: Structured exploratory testing sessions
+- **Documentation**: Use session-based testing with recorded findings
+- **Focus areas**: New features, complex workflows, reported issues
+- **Run frequency**: Before major releases and for complex features
+
+#### A/B Tests
+- **Purpose**: Compare feature variants with real users
+- **Implementation**: Feature flags via LaunchDarkly
+- **Metrics**: User engagement, time spent, feature adoption
+- **Analysis**: Statistical significance testing for decision making
+- **Monitoring**: Real-time dashboards for experiment monitoring
+
+#### Testing Environments
+1. **Development**: Unit, integration tests
+2. **QA**: All automated tests except stress and chaos
+3. **Staging**: Full suite including stress and chaos tests
+4. **Production**: Smoke tests, A/B tests, production monitoring
+
+#### Test Data Management
+- Anonymized production data for realistic testing
+- Seed data scripts for consistent test environments
+- Data cleanup processes after test execution
+
+#### Mocking Strategy
+- External APIs mocked during unit and integration testing
+- Service virtualization for third-party dependencies
+- Consistent mocking patterns across test suites
+
+### 🖹 9. Observability strategy
+
+#### Distributed Tracing
+
+- **Technology**: AWS X-Ray integrated with OpenTelemetry
+- **Implementation**:
+  - Unique trace ID propagated across all microservices
+  - Automatic instrumentation for Java services via X-Ray SDK
+  - Manual instrumentation for critical business operations
+  - Sampling strategy: 100% for errors, 5% for successful requests
+- **Key Metrics**:
+  - End-to-end transaction latency
+  - Service-to-service communication time
+  - Dependency bottlenecks identification
+  - Error tracing across service boundaries
+- **Correlation**: Trace IDs embedded in logs and metrics for cross-referencing
+
+#### Log Management
+
+- **Collection**: AWS CloudWatch Logs with Fluent Bit agents
+- **Processing**: CloudWatch Logs Insights for real-time analysis
+- **Long-term Storage**: S3 with lifecycle policies (30 days hot, 1 year cold)
+- **Standardization**:
+  - JSON structured logging format
+  - Common fields: timestamp, service, traceId, spanId, severity
+  - Context-specific fields for business events
+- **Log Levels**:
+  - ERROR: All exceptions and failures
+  - WARN: Degraded service, retries, slow operations
+  - INFO: Key business events, service startup/shutdown
+  - DEBUG: Development-only, disabled in production
+- **Sensitive Data**: PII automatically redacted before ingestion
+
+#### APM (Application Performance Monitoring)
+
+- **Technology**: AWS CloudWatch ServiceLens with X-Ray integration
+- **Instrumentation**: 
+  - Automatic JVM metrics for Java services
+  - Custom instrumentation for business-critical paths
+  - Database query performance tracking
+- **Key Metrics**:
+  - Application response time distributions
+  - Error rates and exception counts
+  - Memory usage patterns
+  - Garbage collection metrics
+  - Thread pool utilization
+  - Database connection pool metrics
+- **Business Metrics**:
+  - POC creation rate
+  - Search latency
+  - Video generation time
+  - Tenant-specific usage patterns
+
+#### Infrastructure Metrics
+
+- **Collection**: AWS Managed Prometheus
+- **Visualization**: AWS Managed Grafana
+- **Key Metrics**:
+  - CPU, memory, disk utilization
+  - Network throughput and errors
+  - Container health and restart counts
+  - Database connection counts and query performance
+  - Cache hit/miss ratios
+  - Message queue depths and processing rates
+- **Custom Metrics**:
+  - Business-specific throughput indicators
+  - Multi-tenancy resource utilization
+  - Search engine performance metrics
+  - Video processing queue metrics
+
+#### Mobile Performance Monitoring
+
+- **Technology**: AWS Pinpoint Analytics + Firebase Performance Monitoring
+- **Key Metrics**:
+  - App startup time
+  - Screen render time
+  - API call latency from device
+  - UI responsiveness (frame rate)
+  - App stability (crash rate)
+  - Network errors from mobile perspective
+  - Battery consumption
+  - Memory usage on device
+- **User Experience Metrics**:
+  - Time to interactive
+  - Tap response time
+  - Search completion time
+  - Video playback metrics
+- **Segmentation**:
+  - By device type
+  - OS version
+  - Network type (WiFi/4G/5G)
+  - Geographic location
+
+#### Alerting Strategy
+
+- **Primary Tool**: AWS CloudWatch Alarms with PagerDuty integration
+- **Severity Levels**:
+  - P1: Service outage, immediate response (24/7)
+  - P2: Service degradation, response within 1 hour
+  - P3: Non-critical issues, next business day
+- **Alert Types**:
+  - Static threshold alerts
+  - Anomaly detection alerts
+  - Composite alerts (multiple conditions)
+  - Forecast-based alerts (predictive)
+- **Key Alerts**:
+  - Error rate > 1% (P1)
+  - API latency > 500ms (P2)
+  - Database CPU > 80% (P2)
+  - Disk usage > 85% (P3)
+  - Failed tenant authentications spike (P1)
+  - Video generation failure > 5% (P2)
+- **Alert Reduction**:
+  - Correlation rules to prevent alert storms
+  - Auto-remediation for known issues
+  - Alert suppression during maintenance windows
+
+#### Dashboard Strategy
+
+- **Organization**:
+  - Executive dashboard (high-level SLAs, business metrics)
+  - Service-specific dashboards (per-service health)
+  - Infrastructure dashboards
+  - Mobile app performance dashboards
+  - Tenant-specific dashboards
+- **Key Visualizations**:
+  - Service health heatmap
+  - Request volume and latency histograms
+  - Error rate time-series
+  - Resource utilization gauges
+  - User experience metrics
+  - Business KPI correlations with system performance
+
+#### SLOs and SLIs
+
+- **Service Level Objectives**:
+  - API availability: 99.9%
+  - API latency (95th percentile): < 300ms
+  - Search results: < 1s
+  - Video generation: < 10 minutes
+  - Mobile app crash rate: < 0.1%
+- **SLI Measurement**:
+  - Synthetic monitoring probes
+  - Real user monitoring data
+  - Error budget tracking
+  - Burn rate alerts for SLO violations
+
+#### Correlation and Root Cause Analysis
+
+- **Implementation**:
+  - Common correlation IDs across all observability data
+  - Service dependency mapping
+  - Automated RCA suggestions
+  - Change event correlation with incidents
+- **Tools**:
+  - AWS X-Ray service maps
+  - Custom Grafana dashboards with unified metrics/logs/traces
+
+### 🖹 10. Data Store Designs
+
+Persistence Model - Table Structure and Main Queries
 
 ```mermaid
 erDiagram
@@ -1167,266 +1425,84 @@ WHERE m.dojo_id = :dojo_id
 ORDER BY m.timestamp ASC;
 ```
 
-### 🖹 7. Migrations
+### S3 Storage Schema
+```
+mr-bill-platform/
+│
+├── static/                             # Static web resources
+│   ├── images/                         # UI images
+│   │   ├── logos/                      # Brand logos
+│   │   ├── icons/                      # UI icons
+│   │   └── backgrounds/                # Background images
+│   ├── css/                            # Stylesheets
+│   │   └── {version}/                  # Version-specific CSS
+│   └── js/                             # JavaScript files
+│       └── {version}/                  # Version-specific JavaScript
+│
+├── users/                              # User-specific content
+│   └── {user_id}/                      # Partitioned by user ID
+│       ├── profile/                    # User profile assets
+│       │   └── avatar.{ext}            # User avatar
+│       ├── pocs/                       # POC related assets
+│       │   └── {poc_id}/               # POC specific assets
+│       │       ├── thumbnail.{ext}     # POC thumbnail
+│       │       └── screenshots/        # POC screenshots
+│       └── reports/                    # Generated reports
+│           └── {report_id}.pdf         # PDF reports
+│
+├── videos/                             # Generated videos
+│   └── {user_id}/                      # Partitioned by user ID
+│       ├── {year}/                     # Organized by year
+│       │   └── {request_id}.mp4        # Video files
+│       └── thumbnails/                 # Video thumbnails
+│           └── {request_id}.jpg        # Thumbnail for video preview
+│
+├── dojos/                              # Dojo session assets
+│   └── {dojo_id}/                      # Partitioned by dojo ID
+│       ├── recordings/                 # Session recordings
+│       │   └── {dojo_id}.mp4           # Video recording
+│       └── snapshots/                  # Code snapshots
+│           └── {timestamp}.json        # Snapshot at specific time
+│
+└── temp/                               # Temporary assets
+    └── {uuid}/                         # Temporary unique folders
+        └── *                           # Various temporary files
+```
 
-No migrations necessary.
+File Naming Convention
+Files follow a standardized naming convention:
 
-### 🖹 8. Testing strategy
+- User-generated content: `{resource_type}-{timestamp}-{uuid}.{extension}`
 
-Our multi-layered testing strategy ensures quality, reliability, and security across the Mr. Bill platform:
+- System-generated content: `{resource_type}-{generation_date}-{request_id}.{extension}`
 
-#### Unit Tests
-- **Coverage**: Aim for >85% code coverage in all services
-- **Framework**: Jest for JavaScript/TypeScript, JUnit for Java
-- **Mocking**: Use mock libraries to isolate units (Mockito for Java, Jest mocks for JS/TS)
-- **Run frequency**: On every commit via CI pipeline
+- Versioned static assets: `{resource_name}-v{version_number}.{extension}`
 
-#### Integration Tests
-- **Scope**: Verify interactions between services, databases, and third-party APIs
-- **Approach**: Use test containers for database integration
-- **Tools**: Postman collections for API testing, Testcontainers for DB testing
-- **Run frequency**: Daily in CI pipeline
+### Object Lifecycle Policies
+Different content types have specific retention policies:
 
-#### Contract Tests
-- **Purpose**: Ensure service interfaces don't break consumer expectations
-- **Tools**: Pact for consumer-driven contract testing
-- **Implementation**: Define consumer expectations as contracts
-- **Run frequency**: On API changes and during integration tests
+![alt text](image.png)
 
-#### End-to-End Tests
-- **Scope**: Test complete user flows across the entire system
-- **Tools**: Cypress for web, Detox for mobile
-- **Scenarios**: Cover critical user journeys (POC creation, search, reporting)
-- **Run frequency**: Nightly and before releases
+### Access Patterns
 
-#### UI Tests
-- **Scope**: Verify UI components and interactions
-- **Tools**: React Testing Library for components, Storybook for visual testing
-- **Visual regression**: Percy for visual comparisons
-- **Accessibility**: Include a11y tests using axe-core
+The following access patterns are supported:
 
-#### Smoke Tests
-- **Purpose**: Verify core functionality after deployment
-- **Scope**: Login, POC creation, search, basic reporting
-- **Run frequency**: After every deployment to any environment
-- **Implementation**: Automated via CI/CD pipeline
+- Direct authenticated access: Pre-signed URLs for temporary access to private resources
+- Public access: For static resources and publicly shared POCs
+- CDN distribution: For frequently accessed static assets via CloudFront
+- Server-side access: For backend services generating content
 
-#### Stress Tests
-- **Purpose**: Verify system behavior under heavy load
-- **Tools**: JMeter, Gatling, Locust
-- **Scenarios**: High-volume POC creation, concurrent searches, report generation
-- **Metrics**: Response time, error rate, resource utilization
-- **Run frequency**: Monthly and before major releases
+### URL Examples
+```
+# Public POC thumbnail
+https://assets.mr-bill.com/users/{user_id}/pocs/{poc_id}/thumbnail.jpg
 
-#### Chaos Tests
-- **Purpose**: Ensure system resilience during failures
-- **Tools**: Chaos Monkey, AWS Fault Injection Simulator
-- **Scenarios**: Database failures, service outages, network latency
-- **Implementation**: Controlled experiments in staging environment
-- **Run frequency**: Quarterly
+# Pre-signed URL for video access
+https://assets.mr-bill.com/videos/{user_id}/{year}/{request_id}.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...
 
-#### Mutation Tests
-- **Purpose**: Verify test quality by modifying code
-- **Tools**: Stryker for JavaScript, PIT for Java
-- **Coverage**: Focus on critical services and business logic
-- **Run frequency**: Weekly in development environment
-
-#### Fuzzing Tests
-- **Purpose**: Find security vulnerabilities and edge cases
-- **Tools**: AFL for API fuzzing, OWASP ZAP for security
-- **Targets**: API endpoints, input validation, authentication
-- **Run frequency**: Monthly and for security-sensitive changes
-
-#### Exploratory Tests
-- **Approach**: Structured exploratory testing sessions
-- **Documentation**: Use session-based testing with recorded findings
-- **Focus areas**: New features, complex workflows, reported issues
-- **Run frequency**: Before major releases and for complex features
-
-#### A/B Tests
-- **Purpose**: Compare feature variants with real users
-- **Implementation**: Feature flags via LaunchDarkly
-- **Metrics**: User engagement, time spent, feature adoption
-- **Analysis**: Statistical significance testing for decision making
-- **Monitoring**: Real-time dashboards for experiment monitoring
-
-#### Testing Environments
-1. **Development**: Unit, integration tests
-2. **QA**: All automated tests except stress and chaos
-3. **Staging**: Full suite including stress and chaos tests
-4. **Production**: Smoke tests, A/B tests, production monitoring
-
-#### Test Data Management
-- Anonymized production data for realistic testing
-- Seed data scripts for consistent test environments
-- Data cleanup processes after test execution
-
-#### Mocking Strategy
-- External APIs mocked during unit and integration testing
-- Service virtualization for third-party dependencies
-- Consistent mocking patterns across test suites
-
-### 🖹 9. Observability strategy
-
-#### Distributed Tracing
-
-- **Technology**: AWS X-Ray integrated with OpenTelemetry
-- **Implementation**:
-  - Unique trace ID propagated across all microservices
-  - Automatic instrumentation for Java services via X-Ray SDK
-  - Manual instrumentation for critical business operations
-  - Sampling strategy: 100% for errors, 5% for successful requests
-- **Key Metrics**:
-  - End-to-end transaction latency
-  - Service-to-service communication time
-  - Dependency bottlenecks identification
-  - Error tracing across service boundaries
-- **Correlation**: Trace IDs embedded in logs and metrics for cross-referencing
-
-#### Log Management
-
-- **Collection**: AWS CloudWatch Logs with Fluent Bit agents
-- **Processing**: CloudWatch Logs Insights for real-time analysis
-- **Long-term Storage**: S3 with lifecycle policies (30 days hot, 1 year cold)
-- **Standardization**:
-  - JSON structured logging format
-  - Common fields: timestamp, service, traceId, spanId, severity
-  - Context-specific fields for business events
-- **Log Levels**:
-  - ERROR: All exceptions and failures
-  - WARN: Degraded service, retries, slow operations
-  - INFO: Key business events, service startup/shutdown
-  - DEBUG: Development-only, disabled in production
-- **Sensitive Data**: PII automatically redacted before ingestion
-
-#### APM (Application Performance Monitoring)
-
-- **Technology**: AWS CloudWatch ServiceLens with X-Ray integration
-- **Instrumentation**: 
-  - Automatic JVM metrics for Java services
-  - Custom instrumentation for business-critical paths
-  - Database query performance tracking
-- **Key Metrics**:
-  - Application response time distributions
-  - Error rates and exception counts
-  - Memory usage patterns
-  - Garbage collection metrics
-  - Thread pool utilization
-  - Database connection pool metrics
-- **Business Metrics**:
-  - POC creation rate
-  - Search latency
-  - Video generation time
-  - Tenant-specific usage patterns
-
-#### Infrastructure Metrics
-
-- **Collection**: AWS Managed Prometheus
-- **Visualization**: AWS Managed Grafana
-- **Key Metrics**:
-  - CPU, memory, disk utilization
-  - Network throughput and errors
-  - Container health and restart counts
-  - Database connection counts and query performance
-  - Cache hit/miss ratios
-  - Message queue depths and processing rates
-- **Custom Metrics**:
-  - Business-specific throughput indicators
-  - Multi-tenancy resource utilization
-  - Search engine performance metrics
-  - Video processing queue metrics
-
-#### Mobile Performance Monitoring
-
-- **Technology**: AWS Pinpoint Analytics + Firebase Performance Monitoring
-- **Key Metrics**:
-  - App startup time
-  - Screen render time
-  - API call latency from device
-  - UI responsiveness (frame rate)
-  - App stability (crash rate)
-  - Network errors from mobile perspective
-  - Battery consumption
-  - Memory usage on device
-- **User Experience Metrics**:
-  - Time to interactive
-  - Tap response time
-  - Search completion time
-  - Video playback metrics
-- **Segmentation**:
-  - By device type
-  - OS version
-  - Network type (WiFi/4G/5G)
-  - Geographic location
-
-#### Alerting Strategy
-
-- **Primary Tool**: AWS CloudWatch Alarms with PagerDuty integration
-- **Severity Levels**:
-  - P1: Service outage, immediate response (24/7)
-  - P2: Service degradation, response within 1 hour
-  - P3: Non-critical issues, next business day
-- **Alert Types**:
-  - Static threshold alerts
-  - Anomaly detection alerts
-  - Composite alerts (multiple conditions)
-  - Forecast-based alerts (predictive)
-- **Key Alerts**:
-  - Error rate > 1% (P1)
-  - API latency > 500ms (P2)
-  - Database CPU > 80% (P2)
-  - Disk usage > 85% (P3)
-  - Failed tenant authentications spike (P1)
-  - Video generation failure > 5% (P2)
-- **Alert Reduction**:
-  - Correlation rules to prevent alert storms
-  - Auto-remediation for known issues
-  - Alert suppression during maintenance windows
-
-#### Dashboard Strategy
-
-- **Organization**:
-  - Executive dashboard (high-level SLAs, business metrics)
-  - Service-specific dashboards (per-service health)
-  - Infrastructure dashboards
-  - Mobile app performance dashboards
-  - Tenant-specific dashboards
-- **Key Visualizations**:
-  - Service health heatmap
-  - Request volume and latency histograms
-  - Error rate time-series
-  - Resource utilization gauges
-  - User experience metrics
-  - Business KPI correlations with system performance
-
-#### SLOs and SLIs
-
-- **Service Level Objectives**:
-  - API availability: 99.9%
-  - API latency (95th percentile): < 300ms
-  - Search results: < 1s
-  - Video generation: < 10 minutes
-  - Mobile app crash rate: < 0.1%
-- **SLI Measurement**:
-  - Synthetic monitoring probes
-  - Real user monitoring data
-  - Error budget tracking
-  - Burn rate alerts for SLO violations
-
-#### Correlation and Root Cause Analysis
-
-- **Implementation**:
-  - Common correlation IDs across all observability data
-  - Service dependency mapping
-  - Automated RCA suggestions
-  - Change event correlation with incidents
-- **Tools**:
-  - AWS X-Ray service maps
-  - Custom Grafana dashboards with unified metrics/logs/traces
-
-### 🖹 10. Data Store Designs
-
-For each different kind of data store i.e (Postgres, Memcached, Elasticache, S3, Neo4J etc...) describe the schemas, what would be stored there and why, main queries, expectations on performance. Diagrams are welcome but you really need some dictionaries.
+# Static resource via CDN
+https://static.mr-bill.com/images/logos/mr-bill-logo.png
+```
 
 ### 🖹 11. Technology Stack
 
