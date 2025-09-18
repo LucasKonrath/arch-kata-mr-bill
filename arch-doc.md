@@ -1506,7 +1506,213 @@ https://static.mr-bill.com/images/logos/mr-bill-logo.png
 
 ### 🖹 11. Technology Stack
 
-Describe your stack, what databases would be used, what servers, what kind of components, mobile/ui approach, general architecture components, frameworks and libs to be used or not be used and why.
+#### 11.1 Frontend Technologies
+### Mobile Applications
+
+#### Framework: Flutter (latest stable):
+- Single codebase for both Android and iOS platforms
+- High performance with native compilation
+- Rich widget library and customization options
+- Supports offline-first architecture with local SQLite storage
+
+#### State Management: BLoC pattern with Provider
+
+#### Networking: Dio HTTP client with interceptors for auth tokens
+
+#### Local Storage:
+- Hive for lightweight key-value storage
+- SQLite for structured local data
+
+#### Testing: Flutter Test framework with Mockito
+
+### Web Application
+#### Framework: React 18 (latest LTS):
+- Component-based architecture for reusable UI elements
+- Virtual DOM for efficient rendering
+
+#### State Management: Redux Toolkit with RTK Query
+#### Routing: React Router v6
+#### UI Component Library: Material-UI (MUI)
+#### Form Handling: React Hook Form with Yup validation
+#### Data Visualization: D3.js and Chart.js for analytics dashboards
+#### Code Editor: Monaco Editor (VS Code's editor) for Dojo feature
+#### Real-time Communication: Socket.IO client for Dojo collaboration
+#### Build Tool: Vite for faster development and optimized builds
+
+## 11.2 Backend Services
+### Service Architecture
+#### Language: Java 21 (LTS)
+#### Framework: Spring Boot 3 (latest)
+#### API Style: RESTful services with OpenAPI 3 documentation
+#### WebSocket: Spring WebSocket with STOMP for Dojo feature
+#### Serialization: JSON with Jackson
+#### Validation: Hibernate Validator
+#### Dependency Injection: Spring IoC
+#### Reactive Programming: Project Reactor for non-blocking operations
+
+### Authentication Service
+#### JWT Generation/Validation: jjwt library
+#### Password Hashing: Argon2 for secure password storage
+#### Role-based Access Control: Spring Security
+
+### POC Management Service
+#### Repository Integration: JGit for Git operations
+#### Search Engine Client: OpenSearch Java High-Level REST Client
+#### File Handling: AWS SDK for S3 operations
+
+### Content Generation Service
+#### Video Generation: FFmpeg for video processing
+#### PDF Generation: Apache PDFBox
+#### Template Engine: Thymeleaf for report generation
+#### Image Processing: ImageMagick for thumbnails
+
+### Dojo Service
+#### Collaborative Editing: Operational Transform algorithms
+#### Code Execution: GraalVM Polyglot for multi-language support
+
+## 11.3 Database and Storage
+### Relational Database
+#### Engine: PostgreSQL 16 (latest LTS):
+- Strong ACID compliance
+- Advanced indexing capabilities
+- Connection pooling with HikariCP
+- Database migration with Flyway
+#### ORM: Hibernate with JPA for entity management
+
+### Search Engine
+#### Engine: Amazon OpenSearch Service:
+- Full-text search capabilities
+- Faceted search for filtering POCs
+- Aggregations for analytics
+- Near real-time indexing
+- Object Storage
+
+#### Service: Amazon S3:
+- Storage for POC assets, videos, reports
+- Lifecycle policies for cost optimization
+- Server-side encryption for sensitive data
+- Presigned URLs for secure access
+### Caching
+#### Service: Amazon ElastiCache (Redis 7.x LTS):
+- Session storage
+- API response caching
+- Rate limiting implementation
+- Distributed locking mechanisms
+
+## 11.4 Messaging and Integration
+### Event Bus
+#### Service: Amazon SNS
+- Pub/sub messaging between services
+- Fan-out event distribution
+- Delivery status tracking
+
+### Message Processing
+#### Service: Amazon SQS:
+- Decoupling services
+- Message buffering for traffic spikes
+- Dead letter queues for error handling
+
+## 11.5 Infrastructure and Deployment
+### Compute
+#### Service: Amazon EC2 with Auto Scaling Groups:
+- Right-sized instances for each service
+- Spot instances for cost optimization where applicable
+- Automated scaling based on load metrics
+### Content Delivery
+#### Service: Amazon CloudFront:
+- Global distribution of static assets
+- Edge caching for improved performance
+- AWS Shield integration for DDoS protection
+- AWS WAF for application layer protection
+### API Management
+#### Service: Amazon API Gateway with Application Load Balancer:
+- API traffic management
+- Request throttling and quotas
+- API documentation with Swagger UI
+### Container Management
+#### Service: Amazon ECS with EC2 launch type:
+- Docker containers for service isolation
+- Task definitions for resource allocation
+## Service auto-scaling
+### Infrastructure as Code:
+#### Tool: Terraform (latest):
+- Declarative infrastructure definition
+- Environment consistency
+- Modular component design
+## 11.6 Security
+### Encryption and Key Management
+#### Service: AWS KMS:
+- Encryption key management
+- Data encryption at rest and in transit
+- Secure key rotation
+### Identity and Access Management
+#### Service: AWS IAM:
+- Fine-grained access control
+- Service roles and policies
+- Least privilege principle
+### Network Security
+#### Components:
+- VPC with private subnets
+- Security groups and NACLs
+- VPC endpoints for AWS services
+- AWS Shield for DDoS protection
+- AWS WAF for web application firewall
+### Application Security
+#### Practices:
+- OWASP Top 10 mitigation strategies
+- Input validation and sanitization
+### Content Security Policy (CSP):
+- Rate limiting and bot protection
+- Dependency vulnerability scanning
+## 11.7 DevOps and Monitoring
+### CI/CD Pipeline
+#### Service: AWS CodePipeline with GitHub Actions:
+- Automated testing and deployment
+- Environment promotion workflows
+- Infrastructure validation
+- Monitoring and Observability
+### Services:
+- AWS CloudWatch for metrics and logs
+- X-Ray for distributed tracing
+- Grafana for visualization dashboards
+- Prometheus for metric collection
+### Logging
+#### Implementation:
+- Centralized logging with CloudWatch Logs
+- Structured JSON logging format
+- Log retention policies
+- Log-based alerting
+### Alerting
+#### Service: Amazon SNS with PagerDuty integration
+- Critical service alerts
+- Escalation policies
+- On-call rotation management
+## 11.8 Video and Content Processing
+### Video Generation Pipeline
+#### Components:
+- FFmpeg for video encoding and composition
+- AWS Elemental MediaConvert for transcoding
+- AWS Lambda for media processing coordination
+## 11.9 Technology Selection Justification
+### Flutter for Mobile: Chosen for its cross-platform capabilities while maintaining near-native performance. The hot reload feature accelerates development cycles, and the widget-based architecture aligns with modern UI development practices.
+
+### React for Web: Selected for its component-based architecture, large ecosystem, and strong community support. React's virtual DOM provides efficient rendering for POC search results and real-time updates during dojo sessions.
+
+### Spring Boot Backend: Offers robust enterprise features, excellent documentation, and integration capabilities. The mature ecosystem provides solutions for security, data access, and API development needs.
+
+### PostgreSQL: Selected over MongoDB (as specified in non-goals) for its ACID compliance, reliable transactions, and advanced query capabilities needed for complex POC searches and analytics.
+
+### OpenSearch: Provides powerful full-text search capabilities for POCs, better than what could be achieved with standard database queries. The aggregation framework enables sophisticated filtering and faceting.
+
+### AWS Managed Services: Chosen to reduce operational overhead while providing enterprise-grade reliability and security. The ability to scale resources based on demand aligns with the cost-efficiency goals.
+
+### SNS/SQS Messaging: Enables loose coupling between services, improving system resilience and allowing independent scaling of components.
+
+### CloudFront with WAF: Provides content acceleration, security, and DDoS protection at the edge, critical for serving global users with low latency.
+
+### EC2 with ASGs: Offers predictable performance (avoiding Lambda cold starts as mentioned in non-goals) while maintaining scalability and high availability.
+
+### KMS for Encryption: Ensures data security through proper key management and encryption, addressing the robust security requirement.
 
 ### 🖹 12. References
 
