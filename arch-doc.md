@@ -886,8 +886,19 @@ Persistence Model - Table Structure and Main Queries
 
 ```mermaid
 erDiagram
+    TENANTS {
+        uuid tenant_id PK
+        string name
+        string domain
+        string subscription_plan
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
     USERS {
         uuid user_id PK
+        uuid tenant_id FK
         string email
         string password_hash
         string full_name
@@ -901,6 +912,7 @@ erDiagram
     POCS {
         uuid poc_id PK
         uuid user_id FK
+        uuid tenant_id FK
         string name
         string description
         string repository_url
@@ -927,6 +939,7 @@ erDiagram
     CONTENT_REQUESTS {
         uuid request_id PK
         uuid user_id FK
+        uuid tenant_id FK
         string type
         string status
         string title
@@ -952,6 +965,7 @@ erDiagram
     DOJOS {
         uuid dojo_id PK
         uuid creator_id FK
+        uuid tenant_id FK
         string name
         string description
         string language
@@ -992,6 +1006,11 @@ erDiagram
         timestamp timestamp
     }
     
+    TENANTS ||--o{ USERS : has
+    TENANTS ||--o{ POCS : owns
+    TENANTS ||--o{ CONTENT_REQUESTS : manages
+    TENANTS ||--o{ DOJOS : hosts
+    
     USERS ||--o{ POCS : creates
     USERS ||--o{ CONTENT_REQUESTS : requests
     USERS ||--o{ DOJOS : creates
@@ -1012,22 +1031,49 @@ erDiagram
 
 ##### PostgreSQL Database Schemas
 
+##### Tenants
+```sql
+CREATE TABLE tenants (
+  tenant_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  domain VARCHAR(255) NOT NULL UNIQUE,
+  subscription_plan VARCHAR(50) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  settings JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX idx_tenants_domain ON tenants(domain);
+CREATE INDEX idx_tenants_status ON tenants(status);
+```
+
 ##### Users
 ```sql
 CREATE TABLE users (
   user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) NOT NULL UNIQUE,
+  tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+  email VARCHAR(255) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   full_name VARCHAR(100) NOT NULL,
   role VARCHAR(20) NOT NULL DEFAULT 'USER',
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   last_login_at TIMESTAMP WITH TIME ZONE,
-  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  UNIQUE (tenant_id, email)
 );
 
+CREATE INDEX idx_users_tenant_id ON users(tenant_id);
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_status ON users(status);
+
+-- Enable Row Level Security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for tenant isolation
+CREATE POLICY tenant_isolation_policy ON users
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
 ```
 
 #### POCs
@@ -1035,6 +1081,7 @@ CREATE INDEX idx_users_status ON users(status);
 CREATE TABLE pocs (
   poc_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(user_id),
+  tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
   name VARCHAR(100) NOT NULL,
   description TEXT,
   repository_url VARCHAR(255) NOT NULL,
@@ -1046,10 +1093,18 @@ CREATE TABLE pocs (
   thumbnail_url VARCHAR(255)
 );
 
+CREATE INDEX idx_pocs_tenant_id ON pocs(tenant_id);
 CREATE INDEX idx_pocs_user_id ON pocs(user_id);
 CREATE INDEX idx_pocs_language ON pocs(language);
 CREATE INDEX idx_pocs_created_at ON pocs(created_at);
 CREATE INDEX idx_pocs_is_public ON pocs(is_public);
+
+-- Enable Row Level Security
+ALTER TABLE pocs ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for tenant isolation
+CREATE POLICY tenant_isolation_policy ON pocs
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
 
 CREATE TABLE poc_tags (
   poc_id UUID NOT NULL REFERENCES pocs(poc_id) ON DELETE CASCADE,
@@ -1075,6 +1130,7 @@ CREATE INDEX idx_poc_frameworks_framework ON poc_frameworks(framework);
 CREATE TABLE content_requests (
   request_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(user_id),
+  tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
   type VARCHAR(20) NOT NULL, -- 'VIDEO' or 'REPORT'
   status VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'
   title VARCHAR(100) NOT NULL,
@@ -1090,10 +1146,18 @@ CREATE TABLE content_requests (
   progress INT DEFAULT 0 -- 0-100 percentage
 );
 
+CREATE INDEX idx_content_requests_tenant_id ON content_requests(tenant_id);
 CREATE INDEX idx_content_requests_user_id ON content_requests(user_id);
 CREATE INDEX idx_content_requests_status ON content_requests(status);
 CREATE INDEX idx_content_requests_created_at ON content_requests(created_at);
 CREATE INDEX idx_content_requests_type ON content_requests(type);
+
+-- Enable Row Level Security
+ALTER TABLE content_requests ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for tenant isolation
+CREATE POLICY tenant_isolation_policy ON content_requests
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
 
 CREATE TABLE content_request_pocs (
   request_id UUID NOT NULL REFERENCES content_requests(request_id) ON DELETE CASCADE,
@@ -1112,6 +1176,7 @@ CREATE INDEX idx_content_request_pocs_poc_id ON content_request_pocs(poc_id);
 CREATE TABLE dojos (
   dojo_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   creator_id UUID NOT NULL REFERENCES users(user_id),
+  tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
   name VARCHAR(100) NOT NULL,
   description TEXT,
   language VARCHAR(50) NOT NULL,
@@ -1127,10 +1192,18 @@ CREATE TABLE dojos (
   recording_url VARCHAR(512)
 );
 
+CREATE INDEX idx_dojos_tenant_id ON dojos(tenant_id);
 CREATE INDEX idx_dojos_creator_id ON dojos(creator_id);
 CREATE INDEX idx_dojos_status ON dojos(status);
 CREATE INDEX idx_dojos_join_code ON dojos(join_code);
 CREATE INDEX idx_dojos_scheduled_start_time ON dojos(scheduled_start_time);
+
+-- Enable Row Level Security
+ALTER TABLE dojos ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for tenant isolation
+CREATE POLICY tenant_isolation_policy ON dojos
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
 
 CREATE TABLE dojo_participants (
   dojo_id UUID NOT NULL REFERENCES dojos(dojo_id) ON DELETE CASCADE,
@@ -1197,6 +1270,7 @@ CREATE INDEX idx_dojo_chat_messages_timestamp ON dojo_chat_messages(timestamp);
     "properties": {
       "poc_id": { "type": "keyword" },
       "user_id": { "type": "keyword" },
+      "tenant_id": { "type": "keyword" }, 
       "name": { 
         "type": "text", 
         "analyzer": "standard",
@@ -1231,6 +1305,7 @@ CREATE INDEX idx_dojo_chat_messages_timestamp ON dojo_chat_messages(timestamp);
     "properties": {
       "dojo_id": { "type": "keyword" },
       "creator_id": { "type": "keyword" },
+      "tenant_id": { "type": "keyword" },
       "name": { 
         "type": "text", 
         "fields": {
@@ -1255,12 +1330,13 @@ CREATE INDEX idx_dojo_chat_messages_timestamp ON dojo_chat_messages(timestamp);
 ### Main Queries
 #### Search POC by criteria
 ```sql
--- PostgreSQL query to search POCs with filters
+-- PostgreSQL query to search POCs with filters and tenant isolation
 SELECT p.*, array_agg(DISTINCT pt.tag) as tags, array_agg(DISTINCT pf.framework) as frameworks
 FROM pocs p
 LEFT JOIN poc_tags pt ON p.poc_id = pt.poc_id
 LEFT JOIN poc_frameworks pf ON p.poc_id = pf.poc_id
-WHERE (p.user_id = :user_id OR p.is_public = TRUE)
+WHERE p.tenant_id = :tenant_id  -- Multi-tenant isolation
+  AND (p.user_id = :user_id OR p.is_public = TRUE)
   AND (:language IS NULL OR p.language = :language)
   AND (
     :search_term IS NULL OR 
@@ -1280,6 +1356,7 @@ LIMIT :limit OFFSET :offset;
   "query": {
     "bool": {
       "must": [
+        { "term": { "tenant_id": "{{tenant_id}}" } },
         {
           "bool": {
             "should": [
@@ -1337,12 +1414,13 @@ LIMIT :limit OFFSET :offset;
 
 #### Get POCs for annual video
 ```sql
--- Get all POCs for the year for video generation
+-- Get all POCs for the year for video generation with tenant isolation
 SELECT p.*, array_agg(DISTINCT pt.tag) as tags, array_agg(DISTINCT pf.framework) as frameworks
 FROM pocs p
 LEFT JOIN poc_tags pt ON p.poc_id = pt.poc_id
 LEFT JOIN poc_frameworks pf ON p.poc_id = pf.poc_id
-WHERE p.user_id = :user_id
+WHERE p.tenant_id = :tenant_id  -- Multi-tenant isolation
+  AND p.user_id = :user_id
   AND p.created_at BETWEEN :from_date AND :to_date
   AND p.deleted_at IS NULL
   AND (:include_tag IS NULL OR EXISTS (
@@ -1360,14 +1438,15 @@ ORDER BY p.created_at ASC;
 #### Dojo Queries
 #### Find active and upcoming dojos
 ```SQL
--- Find active and upcoming public dojos
+-- Find active and upcoming public dojos with tenant isolation
 SELECT d.*, 
        u.full_name AS creator_name,
        COUNT(dp.user_id) AS participant_count
 FROM dojos d
 JOIN users u ON d.creator_id = u.user_id
 LEFT JOIN dojo_participants dp ON d.dojo_id = dp.dojo_id
-WHERE d.status IN ('SCHEDULED', 'ACTIVE')
+WHERE d.tenant_id = :tenant_id  -- Multi-tenant isolation
+  AND d.status IN ('SCHEDULED', 'ACTIVE')
   AND (d.is_private = FALSE OR d.creator_id = :user_id OR EXISTS (
     SELECT 1 FROM dojo_participants 
     WHERE dojo_id = d.dojo_id AND user_id = :user_id
@@ -1390,7 +1469,7 @@ LIMIT :limit OFFSET :offset;
 
 #### Get Dojo details
 ```sql
--- Get dojo details with participants
+-- Get dojo details with participants and tenant isolation
 SELECT d.*,
        u.full_name AS creator_name,
        json_agg(
@@ -1406,13 +1485,14 @@ FROM dojos d
 JOIN users u ON d.creator_id = u.user_id
 LEFT JOIN dojo_participants dp ON d.dojo_id = dp.dojo_id
 LEFT JOIN users pu ON dp.user_id = pu.user_id
-WHERE d.dojo_id = :dojo_id
+WHERE d.tenant_id = :tenant_id  -- Multi-tenant isolation
+  AND d.dojo_id = :dojo_id
 GROUP BY d.dojo_id, u.full_name;
 ```
 
 #### Get Dojo chat history
 ```sql
--- Get chat history for a dojo session
+-- Get chat history for a dojo session with tenant isolation
 SELECT m.message_id,
        m.user_id,
        u.full_name AS user_name,
@@ -1420,7 +1500,9 @@ SELECT m.message_id,
        m.timestamp
 FROM dojo_chat_messages m
 JOIN users u ON m.user_id = u.user_id
-WHERE m.dojo_id = :dojo_id
+JOIN dojos d ON m.dojo_id = d.dojo_id
+WHERE d.tenant_id = :tenant_id  -- Multi-tenant isolation
+  AND m.dojo_id = :dojo_id
 ORDER BY m.timestamp ASC;
 ```
 
@@ -1438,159 +1520,42 @@ mr-bill-platform/
 │   └── js/                             # JavaScript files
 │       └── {version}/                  # Version-specific JavaScript
 │
-├── users/                              # User-specific content
-│   └── {user_id}/                      # Partitioned by user ID
-│       ├── profile/                    # User profile assets
-│       │   └── avatar.{ext}            # User avatar
-│       ├── pocs/                       # POC related assets
-│       │   └── {poc_id}/               # POC specific assets
-│       │       ├── thumbnail.{ext}     # POC thumbnail
-│       │       └── screenshots/        # POC screenshots
-│       └── reports/                    # Generated reports
-│           └── {report_id}.pdf         # PDF reports
+├── tenants/                            # Tenant-specific assets
+│   └── {tenant_id}/                    # Partitioned by tenant ID
+│       ├── branding/                   # Tenant branding assets
+│       │   ├── logo.{ext}              # Tenant logo
+│       │   └── theme.json              # Tenant UI theme configuration
+│       └── users/                      # User content within this tenant
+│           └── {user_id}/              # User-specific content
+│               ├── profile/            # User profile assets
+│               │   └── avatar.{ext}    # User avatar
+│               ├── pocs/               # POC related assets
+│               │   └── {poc_id}/       # POC specific assets
+│               │       ├── thumbnail.{ext} # POC thumbnail
+│               │       └── screenshots/    # POC screenshots
+│               └── reports/            # Generated reports
+│                   └── {report_id}.pdf # PDF reports
 │
 ├── videos/                             # Generated videos
-│   └── {user_id}/                      # Partitioned by user ID
-│       ├── {year}/                     # Organized by year
-│       │   └── {request_id}.mp4        # Video files
-│       └── thumbnails/                 # Video thumbnails
-│           └── {request_id}.jpg        # Thumbnail for video preview
+│   └── {tenant_id}/                    # Partitioned by tenant ID
+│       └── {user_id}/                  # Further partitioned by user ID
+│           ├── {year}/                 # Organized by year
+│           │   └── {request_id}.mp4    # Video files
+│           └── thumbnails/             # Video thumbnails
+│               └── {request_id}.jpg    # Thumbnail for video preview
 │
 ├── dojos/                              # Dojo session assets
-│   └── {dojo_id}/                      # Partitioned by dojo ID
-│       ├── recordings/                 # Session recordings
-│       │   └── {dojo_id}.mp4           # Video recording
-│       └── snapshots/                  # Code snapshots
-│           └── {timestamp}.json        # Snapshot at specific time
+│   └── {tenant_id}/                    # Partitioned by tenant ID
+│       └── {dojo_id}/                  # Partitioned by dojo ID
+│           ├── recordings/             # Session recordings
+│           │   └── {dojo_id}.mp4       # Video recording
+│           └── snapshots/              # Code snapshots
+│               └── {timestamp}.json    # Snapshot at specific time
 │
 └── temp/                               # Temporary assets
     └── {uuid}/                         # Temporary unique folders
         └── *                           # Various temporary files
 ```
-
-File Naming Convention
-Files follow a standardized naming convention:
-
-- User-generated content: `{resource_type}-{timestamp}-{uuid}.{extension}`
-
-- System-generated content: `{resource_type}-{generation_date}-{request_id}.{extension}`
-
-- Versioned static assets: `{resource_name}-v{version_number}.{extension}`
-
-### Object Lifecycle Policies
-Different content types have specific retention policies:
-
-![alt text](image.png)
-
-### Access Patterns
-
-The following access patterns are supported:
-
-- Direct authenticated access: Pre-signed URLs for temporary access to private resources
-- Public access: For static resources and publicly shared POCs
-- CDN distribution: For frequently accessed static assets via CloudFront
-- Server-side access: For backend services generating content
-
-### URL Examples
-```
-# Public POC thumbnail
-https://assets.mr-bill.com/users/{user_id}/pocs/{poc_id}/thumbnail.jpg
-
-# Pre-signed URL for video access
-https://assets.mr-bill.com/videos/{user_id}/{year}/{request_id}.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...
-
-# Static resource via CDN
-https://static.mr-bill.com/images/logos/mr-bill-logo.png
-```
-
-### 🖹 11. Technology Stack
-
-#### 11.1 Frontend Technologies
-### Mobile Applications
-
-#### Framework: Flutter (latest stable):
-- Single codebase for both Android and iOS platforms
-- High performance with native compilation
-- Rich widget library and customization options
-- Supports offline-first architecture with local SQLite storage
-
-#### State Management: BLoC pattern with Provider
-
-#### Networking: Dio HTTP client with interceptors for auth tokens
-
-#### Local Storage:
-- Hive for lightweight key-value storage
-- SQLite for structured local data
-
-#### Testing: Flutter Test framework with Mockito
-
-### Web Application
-#### Framework: React 18 (latest LTS):
-- Component-based architecture for reusable UI elements
-- Virtual DOM for efficient rendering
-
-#### State Management: Redux Toolkit with RTK Query
-#### Routing: React Router v6
-#### UI Component Library: Material-UI (MUI)
-#### Form Handling: React Hook Form with Yup validation
-#### Data Visualization: D3.js and Chart.js for analytics dashboards
-#### Code Editor: Monaco Editor (VS Code's editor) for Dojo feature
-#### Real-time Communication: Socket.IO client for Dojo collaboration
-#### Build Tool: Vite for faster development and optimized builds
-
-## 11.2 Backend Services
-### Service Architecture
-#### Language: Java 21 (LTS)
-#### Framework: Spring Boot 3 (latest)
-#### API Style: RESTful services with OpenAPI 3 documentation
-#### WebSocket: Spring WebSocket with STOMP for Dojo feature
-#### Serialization: JSON with Jackson
-#### Validation: Hibernate Validator
-#### Dependency Injection: Spring IoC
-#### Reactive Programming: Project Reactor for non-blocking operations
-
-### Authentication Service
-#### JWT Generation/Validation: jjwt library
-#### Password Hashing: Argon2 for secure password storage
-#### Role-based Access Control: Spring Security
-
-### POC Management Service
-#### Repository Integration: JGit for Git operations
-#### Search Engine Client: OpenSearch Java High-Level REST Client
-#### File Handling: AWS SDK for S3 operations
-
-### Content Generation Service
-#### Video Generation: FFmpeg for video processing
-#### PDF Generation: Apache PDFBox
-#### Template Engine: Thymeleaf for report generation
-#### Image Processing: ImageMagick for thumbnails
-
-### Dojo Service
-#### Collaborative Editing: Operational Transform algorithms
-#### Code Execution: GraalVM Polyglot for multi-language support
-
-## 11.3 Database and Storage
-### Relational Database
-#### Engine: PostgreSQL 16 (latest LTS):
-- Strong ACID compliance
-- Advanced indexing capabilities
-- Connection pooling with HikariCP
-- Database migration with Flyway
-#### ORM: Hibernate with JPA for entity management
-
-### Search Engine
-#### Engine: Amazon OpenSearch Service:
-- Full-text search capabilities
-- Faceted search for filtering POCs
-- Aggregations for analytics
-- Near real-time indexing
-- Object Storage
-
-#### Service: Amazon S3:
-- Storage for POC assets, videos, reports
-- Lifecycle policies for cost optimization
-- Server-side encryption for sensitive data
-- Presigned URLs for secure access
 ### Caching
 #### Service: Amazon ElastiCache (Redis 7.x LTS):
 - Session storage
