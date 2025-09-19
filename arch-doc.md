@@ -40,8 +40,7 @@ Such system must be secure and have proper login and be able to support realtime
 
 ### 🏗️ 4. Overall Diagrams
 
-<img width="921" height="683" alt="image" src="https://github.com/user-attachments/assets/536be8f9-84b3-4194-bb8c-b7a4bd0dcf4b" />
-
+![alt text](image-1.png)
 
 Here there will be a bunch of diagrams, to understand the solution.
 ```
