@@ -40,7 +40,7 @@ Such system must be secure and have proper login and be able to support realtime
 
 ### 🏗️ 4. Overall Diagrams
 
-![alt text](image-1.png)
+![alt text](image-2.png)
 
 Here there will be a bunch of diagrams, to understand the solution.
 ```
