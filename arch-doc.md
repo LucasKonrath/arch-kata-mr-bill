@@ -1586,16 +1586,94 @@ mr-bill-platform/
 
 ### 🖹 12. References
 
-* Architecture Anti-Patterns: https://architecture-antipatterns.tech/
-* EIP https://www.enterpriseintegrationpatterns.com/
-* SOA Patterns https://patterns.arcitura.com/soa-patterns
-* API Patterns https://microservice-api-patterns.org/
-* Anti-Patterns https://sourcemaking.com/antipatterns/software-development-antipatterns
-* Refactoring Patterns https://sourcemaking.com/refactoring/refactorings
-* Database Refactoring Patterns https://databaserefactoring.com/
-* Data Modelling Redis https://redis.com/blog/nosql-data-modeling/
-* Cloud Patterns https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/introduction.html
-* 12 Factors App https://12factor.net/
-* Relational DB Patterns https://www.geeksforgeeks.org/design-patterns-for-relational-databases/
-* Rendering Patterns https://www.patterns.dev/vanilla/rendering-patterns/
-* REST API Design https://blog.stoplight.io/api-design-patterns-for-rest-web-services
+####  API Design & Documentation
+OpenAPI Specification: https://spec.openapis.org/oas/v3.0.3
+
+AsyncAPI Specification: https://www.asyncapi.com/docs/specifications/v2.6.0
+
+API Security Best Practices: https://owasp.org/www-project-api-security/
+
+REST API Design Rules: https://restfulapi.net/
+
+Diagramming & Architecture Visualization
+
+PlantUML Documentation: https://plantuml.com/guide
+
+C4 Model for Software Architecture: https://c4model.com/
+
+Architecture Decision Records: https://adr.github.io/
+#### AWS Architecture
+AWS Well-Architected Framework: https://aws.amazon.com/architecture/well-architected/
+
+AWS Multi-tenant SaaS Architecture: https://docs.aws.amazon.com/prescriptive-guidance/latest/saas-multitenant-separation/welcome.html
+
+AWS Media Services: https://aws.amazon.com/media-services/
+#### Multi-tenancy & SaaS
+Multi-tenant Data Architecture: https://docs.microsoft.com/en-us/azure/architecture/guide/multitenant/considerations/data-considerations
+
+SaaS Security Architecture: https://www.cisecurity.org/insights/white-papers/security-considerations-for-cloud-saas
+
+#### Testing Strategy
+Testing Microservices: https://martinfowler.com/articles/microservice-testing/
+
+Contract Testing with Pact: https://docs.pact.io/
+
+Testing Pyramid: https://martinfowler.com/articles/practical-test-pyramid.html
+
+Chaos Engineering: https://principlesofchaos.org/
+
+#### Observability
+Distributed Tracing: https://opentracing.io/docs/overview/
+
+OpenTelemetry: https://opentelemetry.io/docs/
+
+SRE Observability: https://sre.google/sre-book/monitoring-distributed-systems/
+
+Observability-Driven Development: https://charity.wtf/2020/03/03/observability-is-a-many-splendored-thing/
+#### Collaborative Coding
+WebSocket Protocol: https://datatracker.ietf.org/doc/html/rfc6455
+
+Real-time Collaboration Patterns: https://www.ably.io/blog/8-real-time-challenges-to-consider-when-building-multiplayer-collaboration-apps
+
+Operational Transform: https://en.wikipedia.org/wiki/Operational_transformation
+
+#### Video Generation & Processing
+
+FFmpeg Documentation: https://ffmpeg.org/documentation.html
+
+Video Encoding Best Practices: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
+
+AWS Elemental Media Services: https://aws.amazon.com/media-services/resources/
+#### Security
+
+OWASP Top 10: https://owasp.org/www-project-top-ten/
+
+OAuth 2.0 and OpenID Connect: https://oauth.net/2/
+
+NIST Cybersecurity Framework: https://www.nist.gov/cyberframework
+
+AWS Security Best Practices: https://aws.amazon.com/architecture/security-identity-compliance/
+#### Database & Data Modeling
+
+PostgreSQL Documentation: https://www.postgresql.org/docs/
+
+Data Access Patterns: https://docs.microsoft.com/en-us/azure/architecture/patterns/category/data-management
+
+Amazon OpenSearch: https://docs.aws.amazon.com/opensearch-service/
+
+#### Event-Driven Architecture
+
+Event-Driven Architecture: https://aws.amazon.com/event-driven-architecture/
+
+CQRS Pattern: https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs
+
+Event Sourcing: https://martinfowler.com/eaaDev/EventSourcing.html
+#### DevOps & Monitoring
+
+DevOps Handbook: https://itrevolution.com/the-devops-handbook/
+
+Site Reliability Engineering: https://sre.google/books/
+
+Prometheus Documentation: https://prometheus.io/docs/introduction/overview/
+
+Infrastructure as Code with Terraform: https://learn.hashicorp.com/terraform
