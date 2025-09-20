@@ -1,0 +1,762 @@
+openapi: 3.0.3
+info:
+  title: Mr. Bill Platform API
+  description: |
+    API for the Mr. Bill Platform, providing POC management, content generation, and real-time collaborative coding dojos.
+  version: 1.0.0
+servers:
+  - url: https://api.mrbill.com/api/v1
+    description: Production server
+  - url: https://staging-api.mrbill.com/api/v1
+    description: Staging server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - email
+        - password
+        - fullName
+        - companyName
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        fullName:
+          type: string
+        companyName:
+          type: string
+        role:
+          type: string
+          default: USER
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        companyName:
+          type: string
+        role:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+        - tenantId
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        tenantId:
+          type: string
+          format: uuid
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Token expiration time in seconds
+        tokenType:
+          type: string
+          enum: [Bearer]
+        userId:
+          type: string
+          format: uuid
+    POCCreate:
+      type: object
+      required:
+        - name
+        - repositoryUrl
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        repositoryUrl:
+          type: string
+        language:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        frameworks:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+          default: false
+    POC:
+      type: object
+      properties:
+        pocId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        repositoryUrl:
+          type: string
+        language:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        frameworks:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    POCList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/POC'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            totalItems:
+              type: integer
+            totalPages:
+              type: integer
+    VideoRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        fromDate:
+          type: string
+          format: date-time
+          description: Optional, defaults to 1 year ago
+        toDate:
+          type: string
+          format: date-time
+          description: Optional, defaults to current date
+        includeTags:
+          type: array
+          items:
+            type: string
+          description: Optional filter
+        excludeTags:
+          type: array
+          items:
+            type: string
+          description: Optional filter
+        style:
+          type: string
+          description: Video template style
+        musicTrack:
+          type: string
+          description: Optional background music
+    RequestStatus:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PENDING, PROCESSING, COMPLETED, FAILED]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        estimatedCompletionTime:
+          type: string
+          format: date-time
+    VideoStatus:
+      allOf:
+        - $ref: '#/components/schemas/RequestStatus'
+        - type: object
+          properties:
+            videoUrl:
+              type: string
+              format: uri
+              description: Available when status is COMPLETED
+            thumbnailUrl:
+              type: string
+              format: uri
+              description: Available when status is COMPLETED
+            errorMessage:
+              type: string
+              description: Available when status is FAILED
+            createdAt:
+              type: string
+              format: date-time
+            completedAt:
+              type: string
+              format: date-time
+              description: Available when status is COMPLETED or FAILED
+    ReportRequest:
+      type: object
+      required:
+        - title
+        - format
+      properties:
+        title:
+          type: string
+        fromDate:
+          type: string
+          format: date-time
+          description: Optional, defaults to 1 year ago
+        toDate:
+          type: string
+          format: date-time
+          description: Optional, defaults to current date
+        includeTags:
+          type: array
+          items:
+            type: string
+          description: Optional filter
+        excludeTags:
+          type: array
+          items:
+            type: string
+          description: Optional filter
+        groupBy:
+          type: array
+          items:
+            type: string
+            enum: [language, tag, month]
+          description: How to group statistics
+        format:
+          type: string
+          enum: [PDF, EXCEL, CSV]
+    ReportStatus:
+      allOf:
+        - $ref: '#/components/schemas/RequestStatus'
+        - type: object
+          properties:
+            reportUrl:
+              type: string
+              format: uri
+              description: Available when status is COMPLETED
+            format:
+              type: string
+              enum: [PDF, EXCEL, CSV]
+            errorMessage:
+              type: string
+              description: Available when status is FAILED
+            createdAt:
+              type: string
+              format: date-time
+            completedAt:
+              type: string
+              format: date-time
+              description: Available when status is COMPLETED or FAILED
+    DojoCreate:
+      type: object
+      required:
+        - name
+        - language
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        maxParticipants:
+          type: integer
+          description: Optional, defaults to unlimited
+        scheduledStartTime:
+          type: string
+          format: date-time
+          description: Optional, now if not provided
+        isPrivate:
+          type: boolean
+          description: If true, requires invitations
+        initialCode:
+          type: string
+          description: Optional starter code
+    Dojo:
+      type: object
+      properties:
+        dojoId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        maxParticipants:
+          type: integer
+        scheduledStartTime:
+          type: string
+          format: date-time
+        isPrivate:
+          type: boolean
+        initialCode:
+          type: string
+        creatorId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        joinCode:
+          type: string
+          description: For sharing with participants
+        status:
+          type: string
+          enum: [SCHEDULED, ACTIVE, COMPLETED, CANCELLED]
+        createdAt:
+          type: string
+          format: date-time
+    CodeExecutionRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        language:
+          type: string
+          description: Optional, defaults to dojo language
+        timeout:
+          type: integer
+          description: Max execution time in ms (optional)
+        arguments:
+          type: array
+          items:
+            type: string
+          description: Optional command-line arguments
+        stdin:
+          type: string
+          description: Optional standard input
+    ExecutionError:
+      type: object
+      properties:
+        message:
+          type: string
+        line:
+          type: integer
+        column:
+          type: integer
+        stackTrace:
+          type: string
+    CodeExecutionResult:
+      type: object
+      properties:
+        executionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [SUCCESS, ERROR, TIMEOUT]
+        output:
+          type: string
+          description: stdout + stderr
+        stdout:
+          type: string
+        stderr:
+          type: string
+        executionTime:
+          type: integer
+          description: milliseconds
+        memoryUsed:
+          type: integer
+          description: bytes
+        cpuTime:
+          type: integer
+          description: milliseconds
+        language:
+          type: string
+        error:
+          $ref: '#/components/schemas/ExecutionError'
+          description: Present if status is ERROR
+paths:
+  /users:
+    post:
+      summary: Create User
+      description: Creates a new user in the system
+      operationId: createUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input parameters
+        '409':
+          description: Email already exists
+        '500':
+          description: Server error
+  /auth/login:
+    post:
+      summary: User Login
+      description: Authenticates a user and returns access tokens
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '400':
+          description: Invalid credentials
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Account locked or requires verification
+        '500':
+          description: Server error
+  /pocs:
+    post:
+      summary: Create POC
+      description: Creates a new POC with metadata
+      operationId: createPOC
+      tags:
+        - POC Management
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/POCCreate'
+      responses:
+        '201':
+          description: POC created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/POC'
+        '400':
+          description: Invalid input parameters
+        '401':
+          description: Missing or invalid authentication
+        '500':
+          description: Server error
+    get:
+      summary: List User POCs
+      description: Lists all POCs for the authenticated user
+      operationId: listPOCs
+      tags:
+        - POC Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: language
+          in: query
+          description: Filter by programming language
+          schema:
+            type: string
+        - name: tags
+          in: query
+          description: Filter by tags (comma-separated)
+          schema:
+            type: string
+        - name: search
+          in: query
+          description: Search term to match against name or description
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/POCList'
+        '400':
+          description: Invalid query parameters
+        '401':
+          description: Missing or invalid authentication
+        '500':
+          description: Server error
+  /content/videos:
+    post:
+      summary: Generate POC Video
+      description: Generates a video showcasing the user's POCs from the past year
+      operationId: generateVideo
+      tags:
+        - Content Generation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoRequest'
+      responses:
+        '202':
+          description: Request accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestStatus'
+        '400':
+          description: Invalid input parameters
+        '401':
+          description: Missing or invalid authentication
+        '403':
+          description: Insufficient permissions
+        '500':
+          description: Server error
+  /content/videos/{requestId}:
+    get:
+      summary: Get Video Generation Status
+      description: Checks the status of a video generation request
+      operationId: getVideoStatus
+      tags:
+        - Content Generation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: UUID of the video generation request
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoStatus'
+        '401':
+          description: Missing or invalid authentication
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Request not found
+        '500':
+          description: Server error
+  /content/reports:
+    post:
+      summary: Generate POC Report
+      description: Generates a report of the user's POCs from the past year
+      operationId: generateReport
+      tags:
+        - Content Generation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      responses:
+        '202':
+          description: Request accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestStatus'
+        '400':
+          description: Invalid input parameters
+        '401':
+          description: Missing or invalid authentication
+        '403':
+          description: Insufficient permissions
+        '500':
+          description: Server error
+  /content/reports/{reportId}:
+    get:
+      summary: Get Report Status
+      description: Checks the status of a report generation request
+      operationId: getReportStatus
+      tags:
+        - Content Generation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          description: UUID of the report generation request
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatus'
+        '401':
+          description: Missing or invalid authentication
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Report not found
+        '500':
+          description: Server error
+  /dojos:
+    post:
+      summary: Create Dojo
+      description: Creates a new collaborative coding dojo
+      operationId: createDojo
+      tags:
+        - Dojo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DojoCreate'
+      responses:
+        '201':
+          description: Dojo created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dojo'
+        '400':
+          description: Invalid input parameters
+        '401':
+          description: Missing or invalid authentication
+        '403':
+          description: Insufficient permissions
+        '500':
+          description: Server error
+  /dojos/{dojoId}/execute:
+    post:
+      summary: Execute Dojo Code
+      description: Executes code in the GraalVM Polyglot environment
+      operationId: executeCode
+      tags:
+        - Dojo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dojoId
+          in: path
+          required: true
+          description: UUID of the dojo session
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeExecutionRequest'
+      responses:
+        '200':
+          description: Code executed successfully (even if the code itself has errors)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeExecutionResult'
+        '400':
+          description: Invalid input parameters
+        '401':
+          description: Missing or invalid authentication
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Dojo not found
+        '422':
+          description: Code execution failed due to server constraints
+        '500':
+          description: Server error

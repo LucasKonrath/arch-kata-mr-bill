@@ -1,0 +1,805 @@
+asyncapi: 3.0.0
+info:
+  title: Mr. Bill Platform Real-time API
+  version: 1.0.0
+  description: >
+    Real-time WebSocket and messaging specifications for the Mr. Bill Platform.
+
+    This covers both the client-facing WebSocket connections for collaborative
+    coding
+
+    dojos and the internal event-driven messaging between services.
+servers:
+  websocket:
+    host: api.mrbill.com
+    pathname: /api/v1/ws
+    protocol: wss
+    description: WebSocket server for real-time collaborative features
+  events:
+    host: events.mrbill.com
+    protocol: sns
+    description: AWS SNS for internal event messaging
+channels:
+  '/dojos/{dojoId}/live':
+    address: '/dojos/{dojoId}/live'
+    messages:
+      sendDojoMessage.message.0:
+        $ref: '#/components/messages/CodeUpdate'
+      sendDojoMessage.message.1:
+        $ref: '#/components/messages/JoinSession'
+      sendDojoMessage.message.2:
+        $ref: '#/components/messages/LeaveSession'
+      sendDojoMessage.message.3:
+        $ref: '#/components/messages/ChatMessage'
+      sendDojoMessage.message.4:
+        $ref: '#/components/messages/RequestExecutionResult'
+      receiveDojoMessages.message.0:
+        $ref: '#/components/messages/CodeUpdateBroadcast'
+      receiveDojoMessages.message.1:
+        $ref: '#/components/messages/UserJoined'
+      receiveDojoMessages.message.2:
+        $ref: '#/components/messages/UserLeft'
+      receiveDojoMessages.message.3:
+        $ref: '#/components/messages/ChatMessageBroadcast'
+      receiveDojoMessages.message.4:
+        $ref: '#/components/messages/ExecutionResultBroadcast'
+      receiveDojoMessages.message.5:
+        $ref: '#/components/messages/SessionStateUpdate'
+    parameters:
+      dojoId:
+        description: The unique identifier of the dojo session
+  poc-events:
+    address: poc-events
+    messages:
+      publishPOCEvent.message.0:
+        $ref: '#/components/messages/POCCreated'
+      publishPOCEvent.message.1:
+        $ref: '#/components/messages/POCUpdated'
+      publishPOCEvent.message.2:
+        $ref: '#/components/messages/POCDeleted'
+  content-generation-events:
+    address: content-generation-events
+    messages:
+      publishContentGenerationEvent.message.0:
+        $ref: '#/components/messages/VideoGenerationRequested'
+      publishContentGenerationEvent.message.1:
+        $ref: '#/components/messages/VideoGenerationStatusChanged'
+      publishContentGenerationEvent.message.2:
+        $ref: '#/components/messages/ReportGenerationRequested'
+      publishContentGenerationEvent.message.3:
+        $ref: '#/components/messages/ReportGenerationStatusChanged'
+operations:
+  sendDojoMessage:
+    action: receive
+    channel:
+      $ref: '#/channels/~1dojos~1{dojoId}~1live'
+    summary: Messages that clients can send to the server
+    messages:
+      - $ref: '#/channels/~1dojos~1{dojoId}~1live/messages/sendDojoMessage.message.0'
+      - $ref: '#/channels/~1dojos~1{dojoId}~1live/messages/sendDojoMessage.message.1'
+      - $ref: '#/channels/~1dojos~1{dojoId}~1live/messages/sendDojoMessage.message.2'
+      - $ref: '#/channels/~1dojos~1{dojoId}~1live/messages/sendDojoMessage.message.3'
+      - $ref: '#/channels/~1dojos~1{dojoId}~1live/messages/sendDojoMessage.message.4'
+  receiveDojoMessages:
+    action: send
+    channel:
+      $ref: '#/channels/~1dojos~1{dojoId}~1live'
+    summary: Messages that the server sends to clients
+    messages:
+      - $ref: >-
+          #/channels/~1dojos~1{dojoId}~1live/messages/receiveDojoMessages.message.0
+      - $ref: >-
+          #/channels/~1dojos~1{dojoId}~1live/messages/receiveDojoMessages.message.1
+      - $ref: >-
+          #/channels/~1dojos~1{dojoId}~1live/messages/receiveDojoMessages.message.2
+      - $ref: >-
+          #/channels/~1dojos~1{dojoId}~1live/messages/receiveDojoMessages.message.3
+      - $ref: >-
+          #/channels/~1dojos~1{dojoId}~1live/messages/receiveDojoMessages.message.4
+      - $ref: >-
+          #/channels/~1dojos~1{dojoId}~1live/messages/receiveDojoMessages.message.5
+  publishPOCEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/poc-events'
+    summary: Internal events related to POCs
+    messages:
+      - $ref: '#/channels/poc-events/messages/publishPOCEvent.message.0'
+      - $ref: '#/channels/poc-events/messages/publishPOCEvent.message.1'
+      - $ref: '#/channels/poc-events/messages/publishPOCEvent.message.2'
+  publishContentGenerationEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/content-generation-events'
+    summary: Events related to content generation
+    messages:
+      - $ref: >-
+          #/channels/content-generation-events/messages/publishContentGenerationEvent.message.0
+      - $ref: >-
+          #/channels/content-generation-events/messages/publishContentGenerationEvent.message.1
+      - $ref: >-
+          #/channels/content-generation-events/messages/publishContentGenerationEvent.message.2
+      - $ref: >-
+          #/channels/content-generation-events/messages/publishContentGenerationEvent.message.3
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  messages:
+    CodeUpdate:
+      name: codeUpdate
+      title: Code Update
+      summary: A client sends updated code to the server
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - content
+          - language
+          - position
+        properties:
+          content:
+            type: string
+            description: The updated code content
+          language:
+            type: string
+            description: The programming language of the code
+          position:
+            type: object
+            description: Cursor position of the editor
+            properties:
+              line:
+                type: integer
+              column:
+                type: integer
+    JoinSession:
+      name: joinSession
+      title: Join Session
+      summary: Client requests to join a dojo session
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - role
+        properties:
+          role:
+            type: string
+            enum:
+              - PARTICIPANT
+              - OBSERVER
+            description: The role of the user in this session
+    LeaveSession:
+      name: leaveSession
+      title: Leave Session
+      summary: Client notifies the server they are leaving the session
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          reason:
+            type: string
+            description: Optional reason for leaving
+    ChatMessage:
+      name: chatMessage
+      title: Chat Message
+      summary: Client sends a chat message to the dojo session
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - content
+        properties:
+          content:
+            type: string
+            description: The text content of the message
+          type:
+            type: string
+            enum:
+              - TEXT
+              - CODE
+              - SYSTEM
+            default: TEXT
+            description: Type of message
+    RequestExecutionResult:
+      name: requestExecution
+      title: Request Code Execution
+      summary: Client requests the server to execute the current code
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          stdin:
+            type: string
+            description: Optional standard input for the execution
+          arguments:
+            type: array
+            items:
+              type: string
+            description: Optional command-line arguments
+    CodeUpdateBroadcast:
+      name: codeUpdateBroadcast
+      title: Code Update Broadcast
+      summary: Server broadcasts code updates to all clients
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - content
+          - language
+          - userId
+          - timestamp
+        properties:
+          content:
+            type: string
+            description: The updated code content
+          language:
+            type: string
+            description: The programming language of the code
+          userId:
+            type: string
+            format: uuid
+            description: User who made the update
+          userFullName:
+            type: string
+            description: Display name of the user who made the update
+          timestamp:
+            type: string
+            format: date-time
+            description: When the update was made
+          cursorPosition:
+            type: object
+            description: Cursor position of the editor
+            properties:
+              line:
+                type: integer
+              column:
+                type: integer
+    UserJoined:
+      name: userJoined
+      title: User Joined
+      summary: Server notifies that a user has joined the session
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - userId
+          - userFullName
+          - role
+          - timestamp
+        properties:
+          userId:
+            type: string
+            format: uuid
+            description: ID of the user who joined
+          userFullName:
+            type: string
+            description: Display name of the user
+          role:
+            type: string
+            enum:
+              - PARTICIPANT
+              - OBSERVER
+            description: Role of the user in this session
+          timestamp:
+            type: string
+            format: date-time
+            description: When the user joined
+    UserLeft:
+      name: userLeft
+      title: User Left
+      summary: Server notifies that a user has left the session
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - userId
+          - timestamp
+        properties:
+          userId:
+            type: string
+            format: uuid
+            description: ID of the user who left
+          userFullName:
+            type: string
+            description: Display name of the user
+          timestamp:
+            type: string
+            format: date-time
+            description: When the user left
+          reason:
+            type: string
+            description: Optional reason for leaving
+    ChatMessageBroadcast:
+      name: chatMessageBroadcast
+      title: Chat Message Broadcast
+      summary: Server broadcasts a chat message to all clients
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - messageId
+          - content
+          - userId
+          - userFullName
+          - timestamp
+        properties:
+          messageId:
+            type: string
+            format: uuid
+            description: Unique ID for this message
+          content:
+            type: string
+            description: The text content of the message
+          userId:
+            type: string
+            format: uuid
+            description: User who sent the message
+          userFullName:
+            type: string
+            description: Display name of the user who sent the message
+          type:
+            type: string
+            enum:
+              - TEXT
+              - CODE
+              - SYSTEM
+            default: TEXT
+            description: Type of message
+          timestamp:
+            type: string
+            format: date-time
+            description: When the message was sent
+    ExecutionResultBroadcast:
+      name: executionResultBroadcast
+      title: Execution Result Broadcast
+      summary: Server broadcasts code execution results
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - executionId
+          - status
+          - initiatorId
+          - timestamp
+        properties:
+          executionId:
+            type: string
+            format: uuid
+            description: Unique ID for this execution
+          status:
+            type: string
+            enum:
+              - SUCCESS
+              - ERROR
+              - TIMEOUT
+            description: Result of the execution
+          initiatorId:
+            type: string
+            format: uuid
+            description: User who initiated the execution
+          initiatorFullName:
+            type: string
+            description: Display name of the user who initiated the execution
+          output:
+            type: string
+            description: Combined stdout and stderr
+          stdout:
+            type: string
+            description: Standard output
+          stderr:
+            type: string
+            description: Standard error output
+          executionTime:
+            type: integer
+            description: Execution time in milliseconds
+          memoryUsed:
+            type: integer
+            description: Memory used in bytes
+          cpuTime:
+            type: integer
+            description: CPU time used in milliseconds
+          error:
+            type: object
+            description: Error details if status is ERROR
+            properties:
+              message:
+                type: string
+              line:
+                type: integer
+              column:
+                type: integer
+              stackTrace:
+                type: string
+          timestamp:
+            type: string
+            format: date-time
+            description: When the execution was completed
+    SessionStateUpdate:
+      name: sessionStateUpdate
+      title: Session State Update
+      summary: Server sends updates about the dojo session state
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - status
+          - timestamp
+        properties:
+          status:
+            type: string
+            enum:
+              - SCHEDULED
+              - ACTIVE
+              - PAUSED
+              - COMPLETED
+              - CANCELLED
+            description: Current status of the session
+          activeUsers:
+            type: array
+            items:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                userFullName:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - PARTICIPANT
+                    - OBSERVER
+          timestamp:
+            type: string
+            format: date-time
+            description: When this state update was generated
+    POCCreated:
+      name: pocCreated
+      title: POC Created
+      summary: A new POC has been created
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - pocId
+          - userId
+          - tenantId
+          - timestamp
+        properties:
+          pocId:
+            type: string
+            format: uuid
+            description: ID of the created POC
+          userId:
+            type: string
+            format: uuid
+            description: User who created the POC
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          name:
+            type: string
+            description: POC name
+          language:
+            type: string
+            description: Programming language of the POC
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags associated with the POC
+          frameworks:
+            type: array
+            items:
+              type: string
+            description: Frameworks used in the POC
+          timestamp:
+            type: string
+            format: date-time
+            description: When the POC was created
+    POCUpdated:
+      name: pocUpdated
+      title: POC Updated
+      summary: A POC has been updated
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - pocId
+          - userId
+          - tenantId
+          - timestamp
+        properties:
+          pocId:
+            type: string
+            format: uuid
+            description: ID of the updated POC
+          userId:
+            type: string
+            format: uuid
+            description: User who updated the POC
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          timestamp:
+            type: string
+            format: date-time
+            description: When the POC was updated
+          changes:
+            type: array
+            items:
+              type: object
+              properties:
+                field:
+                  type: string
+                  description: Name of the field that changed
+                oldValue:
+                  type: string
+                  description: Previous value
+                newValue:
+                  type: string
+                  description: New value
+    POCDeleted:
+      name: pocDeleted
+      title: POC Deleted
+      summary: A POC has been deleted
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - pocId
+          - userId
+          - tenantId
+          - timestamp
+        properties:
+          pocId:
+            type: string
+            format: uuid
+            description: ID of the deleted POC
+          userId:
+            type: string
+            format: uuid
+            description: User who deleted the POC
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          timestamp:
+            type: string
+            format: date-time
+            description: When the POC was deleted
+    VideoGenerationRequested:
+      name: videoGenerationRequested
+      title: Video Generation Requested
+      summary: A request to generate a video has been created
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - requestId
+          - userId
+          - tenantId
+          - timestamp
+        properties:
+          requestId:
+            type: string
+            format: uuid
+            description: ID of the generation request
+          userId:
+            type: string
+            format: uuid
+            description: User who requested the video
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          title:
+            type: string
+            description: Title of the video
+          fromDate:
+            type: string
+            format: date-time
+            description: Start date for POC selection
+          toDate:
+            type: string
+            format: date-time
+            description: End date for POC selection
+          includeTags:
+            type: array
+            items:
+              type: string
+            description: Tags to include
+          excludeTags:
+            type: array
+            items:
+              type: string
+            description: Tags to exclude
+          style:
+            type: string
+            description: Video style template
+          timestamp:
+            type: string
+            format: date-time
+            description: When the request was created
+    VideoGenerationStatusChanged:
+      name: videoGenerationStatusChanged
+      title: Video Generation Status Changed
+      summary: The status of a video generation request has changed
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - requestId
+          - userId
+          - tenantId
+          - status
+          - timestamp
+        properties:
+          requestId:
+            type: string
+            format: uuid
+            description: ID of the generation request
+          userId:
+            type: string
+            format: uuid
+            description: User who requested the video
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          status:
+            type: string
+            enum:
+              - PENDING
+              - PROCESSING
+              - COMPLETED
+              - FAILED
+            description: New status
+          progress:
+            type: integer
+            minimum: 0
+            maximum: 100
+            description: Progress percentage
+          videoUrl:
+            type: string
+            format: uri
+            description: URL of the generated video (if completed)
+          thumbnailUrl:
+            type: string
+            format: uri
+            description: URL of the video thumbnail (if completed)
+          errorMessage:
+            type: string
+            description: Error message (if failed)
+          timestamp:
+            type: string
+            format: date-time
+            description: When the status change occurred
+    ReportGenerationRequested:
+      name: reportGenerationRequested
+      title: Report Generation Requested
+      summary: A request to generate a report has been created
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - requestId
+          - userId
+          - tenantId
+          - format
+          - timestamp
+        properties:
+          requestId:
+            type: string
+            format: uuid
+            description: ID of the generation request
+          userId:
+            type: string
+            format: uuid
+            description: User who requested the report
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          title:
+            type: string
+            description: Title of the report
+          fromDate:
+            type: string
+            format: date-time
+            description: Start date for POC selection
+          toDate:
+            type: string
+            format: date-time
+            description: End date for POC selection
+          includeTags:
+            type: array
+            items:
+              type: string
+            description: Tags to include
+          excludeTags:
+            type: array
+            items:
+              type: string
+            description: Tags to exclude
+          groupBy:
+            type: array
+            items:
+              type: string
+              enum:
+                - language
+                - tag
+                - month
+            description: How to group statistics
+          format:
+            type: string
+            enum:
+              - PDF
+              - EXCEL
+              - CSV
+            description: Report format
+          timestamp:
+            type: string
+            format: date-time
+            description: When the request was created
+    ReportGenerationStatusChanged:
+      name: reportGenerationStatusChanged
+      title: Report Generation Status Changed
+      summary: The status of a report generation request has changed
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - requestId
+          - userId
+          - tenantId
+          - status
+          - timestamp
+        properties:
+          requestId:
+            type: string
+            format: uuid
+            description: ID of the generation request
+          userId:
+            type: string
+            format: uuid
+            description: User who requested the report
+          tenantId:
+            type: string
+            format: uuid
+            description: Tenant ID
+          status:
+            type: string
+            enum:
+              - PENDING
+              - PROCESSING
+              - COMPLETED
+              - FAILED
+            description: New status
+          progress:
+            type: integer
+            minimum: 0
+            maximum: 100
+            description: Progress percentage
+          reportUrl:
+            type: string
+            format: uri
+            description: URL of the generated report (if completed)
+          format:
+            type: string
+            enum:
+              - PDF
+              - EXCEL
+              - CSV
+            description: Report format
+          errorMessage:
+            type: string
+            description: Error message (if failed)
+          timestamp:
+            type: string
+            format: date-time
+            description: When the status change occurred
