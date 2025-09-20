@@ -437,7 +437,6 @@ classDiagram
         +Date createdAt
         +Date startedAt
         +Date endedAt
-        +String recordingUrl
         +List~DojoParticipant~ participants
     }
     
@@ -1398,7 +1397,6 @@ erDiagram
         timestamp created_at
         timestamp started_at
         timestamp ended_at
-        string recording_url
     }
     
     DOJO_PARTICIPANTS {
@@ -1608,8 +1606,7 @@ CREATE TABLE dojos (
   status VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED', -- 'SCHEDULED', 'ACTIVE', 'COMPLETED', 'CANCELLED'
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   started_at TIMESTAMP WITH TIME ZONE,
-  ended_at TIMESTAMP WITH TIME ZONE,
-  recording_url VARCHAR(512)
+  ended_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE INDEX idx_dojos_tenant_id ON dojos(tenant_id);
@@ -1967,8 +1964,6 @@ mr-bill-platform/
 ├── dojos/                              # Dojo session assets
 │   └── {tenant_id}/                    # Partitioned by tenant ID
 │       └── {dojo_id}/                  # Partitioned by dojo ID
-│           ├── recordings/             # Session recordings
-│           │   └── {dojo_id}.mp4       # Video recording
 │           └── snapshots/              # Code snapshots
 │               └── {timestamp}.json    # Snapshot at specific time
 │
@@ -2076,7 +2071,7 @@ mr-bill-platform/
 #### Components:
 - FFmpeg for video encoding and composition
 - AWS Elemental MediaConvert for transcoding
-- AWS Lambda for media processing coordination
+
 ## 11.9 Technology Selection Justification
 ### Flutter for Mobile: Chosen for its cross-platform capabilities while maintaining near-native performance. The hot reload feature accelerates development cycles, and the widget-based architecture aligns with modern UI development practices.
 
