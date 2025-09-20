@@ -528,10 +528,10 @@ classDiagram
 
 #### Swagger Contract (Sync)
 
-View asyncapi-spec.yml on [Swagger Editor](https://editor.swagger.io/)
+View [openapi-spec.yml](./openapi-spec.yml) on [Swagger Editor](https://editor.swagger.io/)
 
 #### Async Api Contract (Messages/Webhook)
-View openapi-spec.yml on [AsyncApi Studio](https://studio.asyncapi.com/)
+View [asyncapi-spec.yml](./asyncapi-spec.yml) on [AsyncApi Studio](https://studio.asyncapi.com/)
 
 ### 🖹 7. Migrations
 
