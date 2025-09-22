@@ -76,7 +76,7 @@ CONS:
   - More infrastructure management
   - Might be more expensive than serverless depending on the workflows
 
-#### 5.3 Specialized DBs vs Postgresfor everything
+#### 5.3 Specialized DBs vs Postgres for everything
 
 PROS:
 - Specialized DBs will incur better performance
@@ -919,12 +919,6 @@ mr-bill-platform/
     └── {uuid}/                         # Temporary unique folders
         └── *                           # Various temporary files
 ```
-### Caching
-#### Service: Amazon ElastiCache (Redis 7.x LTS):
-- Session storage
-- API response caching
-- Rate limiting implementation
-- Distributed locking mechanisms
 
 ## 11.4 Messaging and Integration
 ### Event Bus
