@@ -51,6 +51,7 @@ Major Decisions:
 2. Single native language for mobile
 3. Multiple DBs - not one relational DB for everything
 4. Restricted to AWS
+5. Single RDS for PostgreSQL
 
 Tradeoffs:
 ## 1. SOA (Service Oriented Architecture) vs Monoliths
@@ -95,6 +96,20 @@ PROS:
 CONS:
 - If many managed solutions are used you might end up with vendor lock-in
 - If using pay-as-you-go cost might be a big issue
+
+## 5. Single RDS for PostgreSQL vs Multiple Database Instances
+
+PROS:
+- Simplified management
+- Cost efficient by avoiding multiple RDS charges
+- Easier to implement and maintain data aggregation and transactions
+- Native row-level security provides strong multi-tenant isolation
+
+CONS:
+- Might become performance bottleneck with scale
+- Shared resource pool means problems could affect all services
+- Schema changes require more careful coordination across teams
+- Single point of failure if not properly configured with multi-AZ and read replicas
 
 ### 🌏 6. For each key major component
 
