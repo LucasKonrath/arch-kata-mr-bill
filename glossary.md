@@ -4,6 +4,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 
 ## A
 
+### A/B Testing
+**Definition:** A statistical method that compares two versions of a webpage, feature, or app against each other to determine which performs better based on user behavior metrics.
+**Context:** Used with feature flags to evaluate new features with real users before full deployment.
+
 ### ACID
 **Definition:** An acronym for Atomicity, Consistency, Isolation, and Durability. These properties guarantee database transactions are processed reliably.
 **Context:** PostgreSQL provides ACID compliance for reliable data transactions in our system.
@@ -92,11 +96,19 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A web application firewall that helps protect your web applications from common web exploits.
 **Context:** Integrated with CloudFront for application layer protection. Configured with rules to prevent SQL injection, XSS, and other OWASP Top 10 vulnerabilities.
 
+### axe-core
+**Definition:** An accessibility testing engine for websites and applications that can identify WCAG (Web Content Accessibility Guidelines) compliance issues.
+**Context:** Used in the testing strategy for ensuring our web and mobile applications meet accessibility standards.
+
 ## B
 
 ### Backend for Frontend (BFF)
 **Definition:** An architectural pattern where separate backend services are created specifically for different frontend clients.
 **Context:** Implemented to optimize API responses for both mobile and web clients, reducing payload sizes and unnecessary processing.
+
+### Blast Radius
+**Definition:** The extent to which a failure in one part of a system can affect other parts of the system.
+**Context:** Minimized through service isolation and bulkhead patterns to limit the impact of failures.
 
 ### Blue/Green Deployment
 **Definition:** A deployment strategy where two identical production environments exist, with only one serving production traffic at a time.
@@ -124,6 +136,14 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A geographically distributed network of proxy servers and their data centers to provide high availability and performance by distributing the service spatially relative to end-users.
 **Context:** CloudFront serves as our CDN for static assets, reducing latency and improving user experience globally.
 
+### Chaos Engineering
+**Definition:** The practice of deliberately injecting failures into systems to test their resilience and identify weaknesses.
+**Context:** Implemented through monthly tests in staging environment using AWS Fault Injection Simulator to ensure our system can handle various failure scenarios.
+
+### Chart.js
+**Definition:** A JavaScript library that allows developers to create responsive and customizable charts for web applications.
+**Context:** Used with D3.js for analytics dashboards and data visualizations in the web application.
+
 ### CI/CD (Continuous Integration/Continuous Deployment)
 **Definition:** A method to frequently deliver apps to customers by introducing automation into the stages of app development.
 **Context:** Implemented with AWS CodePipeline and GitHub Actions for automated testing and deployment. Provides environment promotion workflows and infrastructure validation.
@@ -148,9 +168,17 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A mechanism that allows restricted resources on a web page to be requested from another domain outside the domain from which the first resource was served.
 **Context:** Configured in S3 and API Gateway to restrict access to approved domains.
 
+### Cross-Region Replication
+**Definition:** The automatic, asynchronous copying of objects across AWS Regions to increase availability and disaster recovery capabilities.
+**Context:** Implemented for critical data in S3 to ensure business continuity in case of regional outages.
+
 ### CSP (Content Security Policy)
 **Definition:** A computer security standard introduced to prevent cross-site scripting (XSS), clickjacking and other code injection attacks.
 **Context:** Implemented as part of application security practices to restrict which resources can be loaded and executed.
+
+### Cypress
+**Definition:** A JavaScript end-to-end testing framework designed to make writing and debugging tests easier.
+**Context:** Used for automated testing of the web application, covering critical user journeys and ensuring functionality across browsers.
 
 ## D
 
@@ -161,6 +189,14 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### Data Partitioning
 **Definition:** A technique to divide a database into distinct independent parts to improve manageability, performance, and availability.
 **Context:** Implemented in our multi-tenant system with data separation by tenant ID for security and performance.
+
+### Detox
+**Definition:** An end-to-end testing and automation framework for mobile apps, focusing on helping developers automate user interface testing.
+**Context:** Used for end-to-end testing of the Flutter mobile application across different devices and operating systems.
+
+### DevSecOps
+**Definition:** A culture, automation, and platform design approach that integrates security as a shared responsibility throughout the IT lifecycle.
+**Context:** Implemented through security scanning in CI/CD pipeline, regular vulnerability assessments, and automated compliance checks.
 
 ### Docker
 **Definition:** A platform that uses OS-level virtualization to deliver software in packages called containers.
@@ -180,6 +216,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A highly scalable, fast container management service that makes it easy to run, stop, and manage Docker containers on a cluster.
 **Context:** Used for container management with EC2 launch type. Provides task definitions for resource allocation and service auto-scaling.
 
+### Edge Computing
+**Definition:** A distributed computing paradigm that brings computation and data storage closer to the sources of data, improving response times and saving bandwidth.
+**Context:** Leveraged through CloudFront edge locations for static content delivery and edge functions for simple transformations.
+
 ### Event-Driven Architecture
 **Definition:** A software architecture paradigm promoting the production, detection, consumption of, and reaction to events.
 **Context:** Implemented using SNS/SQS for asynchronous communication between services, improving system resilience and responsiveness.
@@ -190,6 +230,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 
 ## F
 
+### Failover
+**Definition:** The process of switching to a redundant or standby system upon the failure of the previously active system.
+**Context:** Implemented at multiple levels through database read replicas, multi-AZ deployments, and cross-region disaster recovery procedures.
+
 ### Feature Flags
 **Definition:** A technique that turns certain functionality on and off during runtime, without deploying new code.
 **Context:** Used to enable gradual feature rollouts, A/B testing, and quick feature disabling in case of issues.
@@ -197,6 +241,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### FFmpeg
 **Definition:** A free and open-source software project consisting of a suite of libraries and programs for handling video, audio, and other multimedia files and streams.
 **Context:** Used for video encoding and composition in the content generation service.
+
+### Firebase Performance Monitoring
+**Definition:** A service that helps to gain insight into the performance characteristics of iOS, Android, and web apps.
+**Context:** Used in combination with AWS Pinpoint Analytics for detailed performance monitoring of mobile applications.
 
 ### Flutter
 **Definition:** An open-source UI software development kit created by Google used to develop applications for Android, iOS, Linux, Mac, Windows, and the web from a single codebase.
@@ -206,7 +254,19 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** An open-source database migration tool that strongly favors simplicity and convention over configuration.
 **Context:** Used for database migration in PostgreSQL to manage schema changes and versioning.
 
+### Fuzzing
+**Definition:** An automated software testing technique that involves providing invalid, unexpected, or random data as inputs to a program.
+**Context:** Used in our security testing strategy to identify vulnerabilities in API endpoints and input validation logic.
+
 ## G
+
+### Gatling
+**Definition:** An open-source load and performance testing framework based on Scala, Akka and Netty.
+**Context:** Used alongside JMeter and Locust for stress testing critical system components under heavy load.
+
+### GitOps
+**Definition:** A set of practices that use Git as a single source of truth for declarative infrastructure and applications.
+**Context:** Implemented for infrastructure and configuration management, ensuring all changes are tracked, versioned, and auditable.
 
 ### GitHub Actions
 **Definition:** A CI/CD platform that allows you to automate your build, test, and deployment pipeline directly from GitHub.
@@ -226,6 +286,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** An object-relational mapping tool for Java that provides a framework for mapping an object-oriented domain model to a relational database.
 **Context:** Used with JPA for entity management in the backend, providing robust data access capabilities.
 
+### High Availability
+**Definition:** A characteristic of a system designed to ensure an agreed level of operational performance, usually uptime, for a higher than normal period.
+**Context:** Achieved through multi-AZ deployments, auto-scaling groups, and redundant components across the system architecture.
+
 ### HikariCP
 **Definition:** A solid, high-performance, JDBC connection pool.
 **Context:** Used for connection pooling with PostgreSQL, improving database access performance and resource utilization.
@@ -243,6 +307,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### ImageMagick
 **Definition:** A free and open-source software suite for displaying, converting, and editing raster image and vector image files.
 **Context:** Used for thumbnail creation in the content generation service.
+
+### Immutable Infrastructure
+**Definition:** An infrastructure paradigm in which servers are never modified after they're deployed, but rather replaced with new servers built from a common image.
+**Context:** Implemented through our deployment practices where EC2 instances are never modified in-place but replaced with newly built instances.
 
 ### Infrastructure as Code (IaC)
 **Definition:** The process of managing and provisioning computing infrastructure through machine-readable definition files rather than manual processes.
@@ -262,6 +330,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A class-based, object-oriented programming language designed to have as few implementation dependencies as possible.
 **Context:** Java 21 (LTS) is used as the primary backend programming language for its robustness, performance, and enterprise features.
 
+### Jest
+**Definition:** A JavaScript testing framework designed to ensure correctness of JavaScript codebases, with a focus on simplicity and support for large web applications.
+**Context:** Used for unit and integration testing of JavaScript and TypeScript code in the web application.
+
 ### JGit
 **Definition:** A pure Java implementation of the Git version control system.
 **Context:** Used for Git operations in the POC Management Service to interact with source code repositories.
@@ -270,13 +342,41 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A Java library providing end-to-end JWT creation and verification.
 **Context:** Used for JWT generation and validation in the Authentication Service to implement secure, stateless authentication.
 
+### JMeter
+**Definition:** An Apache project that can be used as a load testing tool for analyzing and measuring the performance of web applications.
+**Context:** Used with Gatling and Locust for stress testing and performance evaluation of our services under various load conditions.
+
 ### JPA (Java Persistence API)
 **Definition:** A Java application programming interface specification that describes the management of relational data in applications using Java Platform.
 **Context:** Used with Hibernate for entity management and object-relational mapping.
 
+### JUnit
+**Definition:** A unit testing framework for Java programming language that plays a crucial role in test-driven development.
+**Context:** Used for unit and integration testing of Java code in our backend services.
+
 ### JWT (JSON Web Token)
 **Definition:** A compact, URL-safe means of representing claims to be transferred between two parties.
 **Context:** Used for secure authentication in the system, enabling stateless authentication across services.
+
+## K
+
+### Kubernetes
+**Definition:** An open-source container orchestration system for automating software deployment, scaling, and management.
+**Context:** While not directly used (we use ECS), our architecture is designed with container orchestration principles in mind for potential future migration.
+
+## L
+
+### LaunchDarkly
+**Definition:** A feature management platform that enables teams to safely deliver and control software through feature flags.
+**Context:** Used for implementing feature flags and A/B testing across our application suite.
+
+### Load Testing
+**Definition:** The practice of simulating real-world load on software, applications, or websites to test their performance under expected conditions.
+**Context:** Conducted monthly and before major releases using JMeter, Gatling, and Locust to validate system performance and capacity.
+
+### Locust
+**Definition:** An open-source load testing tool that allows defining user behavior with Python code and swarming a system with millions of simultaneous users.
+**Context:** Used alongside JMeter and Gatling for distributed load testing of our services.
 
 ## M
 
@@ -288,6 +388,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** An architectural style that structures an application as a collection of small, loosely coupled services.
 **Context:** Our system is built using microservices to ensure low coupling, independent scaling, and technology flexibility across different domains.
 
+### Mockito
+**Definition:** A Java mocking framework that tastes good, used for effective unit testing of Java applications.
+**Context:** Used for creating mock objects in unit tests for our Java services, allowing isolation of units under test.
+
 ### Monaco Editor
 **Definition:** The code editor that powers VS Code, a good choice for a code editor in the browser.
 **Context:** Used for the code editor component in the Dojo feature to provide a rich coding experience in the browser.
@@ -295,6 +399,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### Multi-tenancy
 **Definition:** A software architecture where a single instance of software serves multiple customers (tenants) with proper isolation.
 **Context:** Our system implements multi-tenancy at the database level with tenant isolation through row-level security and separate data partitions.
+
+### Mutation Testing
+**Definition:** A type of software testing where specific components of an application are changed and tests are run to determine if they can detect the change.
+**Context:** Used to verify test quality by modifying code with tools like Stryker for JavaScript and PIT for Java.
 
 ## N
 
@@ -304,9 +412,17 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 
 ## O
 
+### OAuth 2.0
+**Definition:** An authorization framework that enables applications to obtain limited access to user accounts on an HTTP service.
+**Context:** Implemented for secure third-party integrations and authentication with external services.
+
 ### OpenAPI
 **Definition:** A specification for machine-readable interface files for describing, producing, consuming, and visualizing RESTful web services.
 **Context:** Used for API documentation in backend services, generating interactive Swagger UI documentation.
+
+### OpenTelemetry
+**Definition:** A collection of tools, APIs, and SDKs used to instrument, generate, collect, and export telemetry data for analysis.
+**Context:** Integrated with AWS X-Ray for distributed tracing and application performance monitoring.
 
 ### Operational Transform
 **Definition:** A technology for supporting a range of collaboration functionalities in advanced collaborative software systems.
@@ -330,6 +446,18 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** An open-source Java tool for working with PDF documents.
 **Context:** Used for PDF generation in the content generation service to create rich, formatted reports.
 
+### Percy
+**Definition:** A visual testing and review platform that captures screenshots, compares them against baselines, and highlights visual changes.
+**Context:** Used for visual regression testing of UI components to ensure consistency across browsers and devices.
+
+### PIT (PIT Mutation Testing)
+**Definition:** A state-of-the-art mutation testing system for Java that provides line and mutation coverage metrics.
+**Context:** Used for mutation testing of Java code to verify the quality of unit tests.
+
+### Pinpoint Analytics
+**Definition:** An AWS service that enables app developers to understand user behavior, engage with users, and track metrics.
+**Context:** Used with Firebase Performance Monitoring to gather analytics from mobile applications.
+
 ### PostgreSQL
 **Definition:** A powerful, open-source object-relational database system.
 **Context:** Used as the relational database engine for the system, providing ACID compliance, advanced query capabilities, and robust transaction support.
@@ -348,6 +476,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A strategy to control the rate of requests that clients can make to an API or service within a specified time window.
 **Context:** Implemented at the API Gateway and application levels to prevent abuse and ensure fair resource allocation.
 
+### RCA (Root Cause Analysis)
+**Definition:** A method of problem-solving used for identifying the root causes of faults or problems.
+**Context:** Used in our incident management process to identify underlying issues and prevent recurrence of incidents.
+
 ### Read Replica
 **Definition:** A copy of a database instance that reflects the same data as the primary instance, used to offload read operations.
 **Context:** Configured for PostgreSQL to scale read capacity and improve query performance for reporting and search operations.
@@ -364,6 +496,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A standard library for routing in React applications.
 **Context:** Used for routing in the web application (v6), providing declarative navigation and URL management.
 
+### React Testing Library
+**Definition:** A light-weight solution for testing React components that encourages better testing practices.
+**Context:** Used for testing React components in a way that resembles how users interact with the application.
+
 ### Redis
 **Definition:** An in-memory data structure store, used as a database, cache, and message broker.
 **Context:** Used with Amazon ElastiCache for caching, session storage, and more. Provides sub-millisecond response times for high-performance operations.
@@ -379,6 +515,14 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### Retry Pattern
 **Definition:** A resilience pattern where failed operations are automatically retried a specified number of times with appropriate backoff strategies.
 **Context:** Implemented for transient failures in service communication to improve system reliability.
+
+### RPO (Recovery Point Objective)
+**Definition:** The maximum targeted period in which data might be lost from an IT service due to a major incident.
+**Context:** Defined as part of our disaster recovery strategy, with different tiers based on data criticality.
+
+### RTO (Recovery Time Objective)
+**Definition:** The targeted duration of time within which a business process must be restored after a disaster to avoid unacceptable consequences.
+**Context:** Established as part of our business continuity plan, with critical services having lower RTO values.
 
 ### RTK Query
 **Definition:** A powerful data fetching and caching tool built into Redux Toolkit.
@@ -401,6 +545,18 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### Sharding
 **Definition:** A database architecture pattern related to horizontal partitioning, splitting data across multiple databases to improve performance and scalability.
 **Context:** Implemented for high-volume data like dojo code snapshots and chat messages to ensure consistent performance.
+
+### SLA (Service Level Agreement)
+**Definition:** A formal agreement between a service provider and customer defining the expected level of service, responsibilities, and remedies for service failures.
+**Context:** Established with our multi-tenant customers, detailing system availability guarantees and support response times.
+
+### SLI (Service Level Indicator)
+**Definition:** A quantitative measure of some aspect of the level of service being provided.
+**Context:** Key metrics like API availability percentage and response time are tracked as SLIs in our observability strategy.
+
+### SLO (Service Level Objective)
+**Definition:** A target value or range of values for a service level that is measured by an SLI.
+**Context:** Defined objectives like 99.9% API availability and sub-300ms API response time that our system aims to achieve.
 
 ### Socket.IO
 **Definition:** A JavaScript library for real-time web applications that enables real-time, bidirectional communication between web clients and servers.
@@ -430,6 +586,14 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** A simple text-based messaging protocol, designed for working with message-oriented middleware.
 **Context:** Used with Spring WebSocket for the Dojo feature to structure real-time message exchange.
 
+### Storybook
+**Definition:** An open source tool for developing UI components in isolation, allowing you to browse a component library, view different states of each component, and interactively develop and test them.
+**Context:** Used for UI component development and visual testing in the web application.
+
+### Stryker
+**Definition:** A mutation testing framework for JavaScript and friends that helps you write better tests by making sure your tests can detect bugs.
+**Context:** Used for JavaScript and TypeScript mutation testing to validate test quality.
+
 ### Swagger UI
 **Definition:** A collection of HTML, JavaScript, and CSS assets that dynamically generate documentation from an OpenAPI specification.
 **Context:** Used for API documentation with API Gateway, providing interactive API exploration capabilities.
@@ -439,6 +603,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 ### Terraform
 **Definition:** An open-source infrastructure as code software tool created by HashiCorp.
 **Context:** Used for declarative infrastructure definition and environment consistency, ensuring reproducible deployments.
+
+### Testcontainers
+**Definition:** A Java library that provides lightweight, throwaway instances of common databases, message brokers, and other services for testing purposes.
+**Context:** Used for integration testing with real database instances running in containers.
 
 ### Thymeleaf
 **Definition:** A modern server-side Java template engine for both web and standalone environments.
