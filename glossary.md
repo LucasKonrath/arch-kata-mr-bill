@@ -64,6 +64,12 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Definition:** An architectural pattern where a single entry point is created for a group of microservices, handling cross-cutting concerns like authentication, monitoring, and rate limiting.
 **Context:** Implemented using AWS API Gateway to provide a unified entry point for our microservices architecture.
 
+### ARRAY_AGG
+**Definition**: An aggregate function in PostgreSQL that inputs a set of values and concatenates them into a single array. It transforms rows from a query result into a consolidated array value. 
+**Context**: Used for optimizing API responses by reducing database round trips when fetching related data. Particularly valuable in the POC management service for retrieving collections of tags, frameworks, and associated metadata in a single query. Also used in reporting to efficiently gather and process grouped data for analytics.
+
+
+
 ### ASG (Auto Scaling Group)
 **Definition:** AWS feature that ensures you have the correct number of Amazon EC2 instances available to handle the load for your application.
 **Context:** Provides automated scaling of EC2 instances based on load metrics, ensuring cost-efficient resource utilization while maintaining performance.
@@ -229,6 +235,10 @@ This glossary provides definitions for the technical terms used in the Mr. Bill 
 **Context:** Implemented in service communication to handle transient failures gracefully without overwhelming the target service.
 
 ## F
+
+### Facets
+**Definition:** A navigation component used in search interfaces that allows users to filter search results by applying multiple filters across different dimensions of the data.
+**Context:** Implemented in our OpenSearch integration to provide dynamic filtering options for POCs based on properties like language, tags, and frameworks. Faceted search enables users to progressively narrow their search results by selecting specific criteria.
 
 ### Failover
 **Definition:** The process of switching to a redundant or standby system upon the failure of the previously active system.

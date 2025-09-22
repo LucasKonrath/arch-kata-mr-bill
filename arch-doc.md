@@ -54,7 +54,7 @@ Major Decisions:
 5. Single RDS for PostgreSQL
 
 Tradeoffs:
-## 1. SOA (Service Oriented Architecture) vs Monoliths
+#### 5.1 SOA (Service Oriented Architecture) vs Monoliths
 
 PROS: 
   -  Better isolation
@@ -66,7 +66,7 @@ CONS:
   - Might be unnecessary spending if the platform is not used enough
 
 
-## 2. Services vs Serverless
+#### 5.2 Services vs Serverless
 
 PROS:
   - Predictable performance
@@ -76,18 +76,17 @@ CONS:
   - More infrastructure management
   - Might be more expensive than serverless depending on the workflows
 
-## 3. Multiple DBs vs One Relational DB
+#### 5.3 Specialized DBs vs Postgresfor everything
 
 PROS:
 - Specialized DBs will incur better performance
-- No distributed monolith
-- Loosen coupling
+- Features for searching not present natively on Postgres
 
 CONS:
 - Higher cost to maintain
 - Higher integration between data sources and services needed
 
-## 4. Restrict to AWS vs Private Cloud
+#### 5.4 Restrict to AWS vs Private Cloud
 
 PROS:
 - Need to worry less about maintenance
@@ -97,7 +96,7 @@ CONS:
 - If many managed solutions are used you might end up with vendor lock-in
 - If using pay-as-you-go cost might be a big issue
 
-## 5. Single RDS for PostgreSQL vs Multiple Database Instances
+#### 5.5 Single RDS for PostgreSQL vs Multiple Database Instances
 
 PROS:
 - Simplified management
