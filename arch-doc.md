@@ -1,7 +1,3 @@
-# 🧬 Template
-
-This is a template created by Diego Pacheco which the goal to better describe a tought process which is called architecture. This should be used to learn software architecture and to pratice with use cases.
-
 ## 🏛️ Structure
 
 ### 1. 🎯 Problem Statement and Context
@@ -40,15 +36,12 @@ Such system must be secure and have proper login and be able to support realtime
 
 ### 🏗️ 4. Overall Diagrams
 
+### 4.1 Overall diagram
 ![alt text](image-9.png)
 
-Here there will be a bunch of diagrams, to understand the solution.
-```
-🗂️ 4.1 Overall architecture: Show the big picture, relationship between macro components.
-🗂️ 4.2 Deployment: Show the infra in a big picture. 
-🗂️ 4.3 Use Cases: Make 1 macro use case diagram that list the main capability that needs to be covered. 
-```
-Recommended Reading: http://diego-pacheco.blogspot.com/2020/10/uml-hidden-gems.html
+### 4.2 Use cases
+![alt text](image-10.png)
+
 
 ### 🧭 5. Trade-offs
 
