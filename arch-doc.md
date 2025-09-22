@@ -40,7 +40,7 @@ Such system must be secure and have proper login and be able to support realtime
 
 ### 🏗️ 4. Overall Diagrams
 
-![alt text](image-2.png)
+![alt text](image-9.png)
 
 Here there will be a bunch of diagrams, to understand the solution.
 ```
@@ -122,7 +122,7 @@ CONS:
 
 View [openapi-spec.yml](./openapi-spec.yml) on [Swagger Editor](https://editor.swagger.io/)
 
-#### Async Api Contract (Messages/Webhook)
+#### Async Api Contract (Messages/Websocket)
 View [asyncapi-spec.yml](./asyncapi-spec.yml) on [AsyncApi Studio](https://studio.asyncapi.com/)
 
 ### 🖹 7. Migrations
